@@ -5,7 +5,6 @@ import {
   BellRing, Settings, ChevronLeft, ChevronRight, Wifi, ClipboardList
 } from 'lucide-react'
 import useStore from '../../store/useStore'
-import useAuditLog from '../../store/useAuditLog'
 import clsx from 'clsx'
 
 const NAV = [
@@ -19,9 +18,7 @@ const NAV = [
 
 export default function Sidebar() {
   const { sidebarOpen, toggleSidebar, alerts } = useStore()
-  const auditEvents = useAuditLog(s => s.events)
-  const unread      = alerts.filter(a => !a.read).length
-  const newAudit    = auditEvents.filter(e => e.severity === 'critical' || e.severity === 'warning').length
+  const unread = alerts.filter(a => !a.read).length
 
   return (
     <aside
@@ -70,11 +67,6 @@ export default function Sidebar() {
               {label === 'Alerts' && unread > 0 && (
                 <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[9px] flex items-center justify-center text-white font-bold">
                   {unread}
-                </span>
-              )}
-              {label === 'Audit Log' && newAudit > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-amber-500 rounded-full text-[9px] flex items-center justify-center text-white font-bold">
-                  {newAudit > 99 ? '99+' : newAudit}
                 </span>
               )}
             </div>
