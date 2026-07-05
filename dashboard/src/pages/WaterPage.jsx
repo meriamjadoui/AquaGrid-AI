@@ -9,8 +9,8 @@ export default function WaterPage() {
   const { sensors, history, aiResults } = useStore()
   const data = history.slice(-24)
 
-  const leak = aiResults.leak
-  const ph   = aiResults.ph
+  const leak = aiResults?.leak ?? { isLeak: false, confidence: 0 }
+  const ph   = aiResults?.ph   ?? { contaminated: false, deviationScore: 0 }
 
   const aiLeakRisk = leak.isLeak
     ? Math.max(sensors.leakRisk, 60)
