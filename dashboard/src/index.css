@@ -2,35 +2,55 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── SDG color tokens ──────────────────────────────────────────────────── */
+:root {
+  --sdg-6:  #26BDE2;   /* Clean Water & Sanitation */
+  --sdg-7:  #FCC30B;   /* Affordable & Clean Energy */
+  --sdg-9:  #FD6925;   /* Industry, Innovation & Infrastructure */
+  --sdg-11: #FD9D24;   /* Sustainable Cities & Communities */
+  --sdg-13: #3F7E44;   /* Climate Action */
+}
+
 /* ── Dark theme (default) ──────────────────────────────────────────────── */
 :root,
 [data-theme="dark"] {
-  --color-surface-bg:     #0e1117;
-  --color-surface-card:   #161b22;
-  --color-surface-border: #21262d;
-  --color-surface-hover:  #1c2128;
-  --color-surface-offset: #1e2430;
+  --color-surface-bg:       #0c1015;
+  --color-surface-card:     #131920;
+  --color-surface-border:   #1e2835;
+  --color-surface-hover:    #1a2330;
+  --color-surface-offset:   #182030;
+  --color-surface-dynamic:  #202c3a;
 
-  --color-text:           #e2e8f0;   /* slate-200  */
-  --color-text-muted:     #94a3b8;   /* slate-400  */
-  --color-text-faint:     #475569;   /* slate-600  */
-  --color-text-inverse:   #0e1117;
+  --color-text:           #e2e8f0;
+  --color-text-muted:     #94a3b8;
+  --color-text-faint:     #475569;
+  --color-text-inverse:   #0c1015;
+
+  /* Primary = SDG-6 blue adapted for dark */
+  --color-primary:        #26BDE2;
+  --color-primary-hover:  #1da3c6;
+  --color-primary-dim:    rgba(38,189,226,.15);
 
   color-scheme: dark;
 }
 
 /* ── Light theme ───────────────────────────────────────────────────────── */
 [data-theme="light"] {
-  --color-surface-bg:     #f0f4f8;
-  --color-surface-card:   #ffffff;
-  --color-surface-border: #dde3ec;
-  --color-surface-hover:  #e8edf5;
-  --color-surface-offset: #edf1f7;
+  --color-surface-bg:       #f0f7fc;
+  --color-surface-card:     #ffffff;
+  --color-surface-border:   #cce8f4;
+  --color-surface-hover:    #e3f3fb;
+  --color-surface-offset:   #e8f4fb;
+  --color-surface-dynamic:  #d6edf8;
 
-  --color-text:           #1a202c;   /* slate-900  */
-  --color-text-muted:     #4a5568;   /* slate-700  */
-  --color-text-faint:     #a0aec0;   /* slate-400  */
+  --color-text:           #0f2430;
+  --color-text-muted:     #3a6070;
+  --color-text-faint:     #8ab0c0;
   --color-text-inverse:   #ffffff;
+
+  --color-primary:        #0d8fae;
+  --color-primary-hover:  #0a7591;
+  --color-primary-dim:    rgba(13,143,174,.12);
 
   color-scheme: light;
 }
@@ -66,27 +86,24 @@
     border: 1px solid var(--color-surface-border);
     @apply rounded-xl p-4;
   }
-
   .card-hover {
     @apply card transition-all duration-200;
   }
   .card-hover:hover {
-    border-color: rgba(1,105,111,.4);
+    border-color: rgba(38,189,226,.35);
     background-color: var(--color-surface-hover);
   }
 
   /* Badges */
   .badge      { @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium; }
-  .badge-ok   { @apply badge bg-emerald-500/10 text-emerald-600 border border-emerald-500/20; }
-  .badge-warn { @apply badge bg-amber-500/10   text-amber-600   border border-amber-500/20; }
-  .badge-alert{ @apply badge bg-red-500/10     text-red-600     border border-red-500/20; }
-  .badge-info { @apply badge bg-blue-500/10    text-blue-600    border border-blue-500/20; }
-
-  /* In dark mode keep badge text lighter */
+  .badge-ok   { @apply badge bg-emerald-500/10 text-emerald-700 border border-emerald-500/20; }
+  .badge-warn { @apply badge bg-amber-500/10   text-amber-700   border border-amber-500/20; }
+  .badge-alert{ @apply badge bg-red-500/10     text-red-700     border border-red-500/20; }
+  .badge-info { @apply badge bg-sky-500/10     text-sky-700     border border-sky-500/20; }
   [data-theme="dark"] .badge-ok    { @apply text-emerald-400; }
   [data-theme="dark"] .badge-warn  { @apply text-amber-400; }
   [data-theme="dark"] .badge-alert { @apply text-red-400; }
-  [data-theme="dark"] .badge-info  { @apply text-blue-400; }
+  [data-theme="dark"] .badge-info  { @apply text-sky-400; }
 
   /* KPI */
   .kpi-card  { @apply card flex flex-col gap-3; }
@@ -106,25 +123,29 @@
     color: var(--color-text);
   }
   .sidebar-item.active {
-    @apply bg-primary-500/15 text-primary-500 font-medium;
-  }
-  [data-theme="dark"] .sidebar-item.active {
-    @apply text-primary-400;
+    background-color: var(--color-primary-dim);
+    color: var(--color-primary);
+    font-weight: 500;
   }
 
   /* Buttons */
   .btn-primary {
-    @apply inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-500
-           hover:bg-primary-600 text-white text-sm font-medium transition-colors duration-150;
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded-lg text-white text-sm font-medium transition-colors duration-150;
+    background-color: var(--color-primary);
   }
+  .btn-primary:hover { background-color: var(--color-primary-hover); }
   .btn-ghost {
-    @apply inline-flex items-center gap-2 px-3 py-2 rounded-lg
-           text-sm transition-colors duration-150;
+    @apply inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors duration-150;
     color: var(--color-text-muted);
   }
   .btn-ghost:hover {
     background-color: var(--color-surface-hover);
     color: var(--color-text);
+  }
+
+  /* SDG badge pill */
+  .sdg-pill {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold text-white;
   }
 
   /* Skeleton */
@@ -142,17 +163,19 @@
 /* ── Utilities ─────────────────────────────────────────────────────────── */
 @layer utilities {
   .text-gradient {
-    @apply bg-gradient-to-r from-primary-400 to-water bg-clip-text text-transparent;
+    background: linear-gradient(135deg, var(--sdg-6), var(--sdg-13));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
   .glow-primary {
-    box-shadow: 0 0 20px rgba(1,105,111,.30);
+    box-shadow: 0 0 20px rgba(38,189,226,.25);
   }
   .gauge-ring {
     transform-origin: center;
     transform: rotate(-90deg);
     transition: stroke-dashoffset 1s cubic-bezier(0.16,1,0.3,1);
   }
-  /* text-muted helper that respects theme */
   .text-theme-muted  { color: var(--color-text-muted); }
   .text-theme-faint  { color: var(--color-text-faint); }
   .bg-theme-card     { background-color: var(--color-surface-card); }
