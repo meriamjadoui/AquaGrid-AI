@@ -7,14 +7,6 @@ import AquaLineChart from '../components/Charts/LineChart'
 import { AlertItem } from '../components/UI/AlertBadge'
 import { getStatus } from '../utils/mockData'
 
-const SDGS = [
-  { n: 6,  color: '#26BDE2', label: 'Clean Water & Sanitation',          desc: 'Real-time reservoir & pipeline monitoring reduces water loss.' },
-  { n: 7,  color: '#FCC30B', label: 'Affordable & Clean Energy',          desc: 'Solar tracking and battery analytics maximise renewable yield.' },
-  { n: 9,  color: '#FD6925', label: 'Industry, Innovation & Infrastructure', desc: 'AI-driven predictive maintenance keeps rural infrastructure resilient.' },
-  { n: 11, color: '#FD9D24', label: 'Sustainable Cities & Communities',   desc: 'Autonomous pump scheduling ensures equitable water distribution.' },
-  { n: 13, color: '#3F7E44', label: 'Climate Action',                     desc: 'Reduced leakage and optimal energy use lower the carbon footprint.' },
-]
-
 // Derive AI-recommended pump schedule from solar forecast
 function getPumpSchedule(sensors, aiResults) {
   const h = new Date().getHours()
@@ -37,7 +29,7 @@ export default function Overview() {
   const schedule = getPumpSchedule(sensors, aiResults)
 
   // Community metrics (derived)
-  const householdsServed = Math.round(sensors.totalConsumed / 18)  // avg 18 L/person/day, ~5 per household
+  const householdsServed = Math.round(sensors.totalConsumed / 18)
   const monitoringDays   = impact.monitoringDaysSeed + Math.floor(impact.pumpUptimeMin / 1440)
   const waterSavedDisplay = (impact.waterSavedL + monitoringDays * 12).toFixed(0)
   const energySavedDisplay = (impact.energySavedWh + monitoringDays * 85).toFixed(0)
@@ -45,30 +37,6 @@ export default function Overview() {
 
   return (
     <div className="space-y-6">
-      {/* ── Mission banner ── */}
-      <div
-        className="rounded-xl p-4 border flex items-start gap-4 flex-wrap"
-        style={{ background: 'rgba(38,189,226,0.07)', borderColor: 'rgba(38,189,226,0.25)' }}
-      >
-        <div className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: '#26BDE2' }}>
-          <Droplets size={20} color="white" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>
-            Solar-Powered Water Infrastructure — Rural Africa
-          </p>
-          <p className="text-xs mt-0.5 leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>
-            AquaWise provides continuous AI-driven monitoring over borehole pumps, reservoirs, and solar panels
-            so that leaks, pump failures, overflow, and energy waste are detected before damage occurs —
-            ensuring reliable access to clean water for rural communities.
-          </p>
-        </div>
-        <div className="flex items-center gap-2 text-xs font-medium shrink-0" style={{ color: '#3F7E44' }}>
-          <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-          System Online
-        </div>
-      </div>
-
       {/* ── Page header ── */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
@@ -235,35 +203,6 @@ export default function Overview() {
               Based on water at $0.003/L and energy at $0.0001/Wh · {monitoringDays} days monitored
             </p>
           </div>
-          <span className="text-xs font-bold px-2 py-1 rounded-full" style={{ background: 'rgba(63,126,68,0.15)', color: '#3F7E44' }}>
-            SDG 6 · SDG 7
-          </span>
-        </div>
-      </div>
-
-      {/* ── SDG Alignment ── */}
-      <div className="card">
-        <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-          <div>
-            <h3 className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>UN SDG Alignment</h3>
-            <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-muted)' }}>AquaWise directly contributes to 5 Sustainable Development Goals</p>
-          </div>
-          <span className="text-[10px] font-bold px-2 py-1 rounded-full" style={{ background: 'rgba(38,189,226,.15)', color: 'var(--color-primary)' }}>
-            Africa · Rural Water Infrastructure
-          </span>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-          {SDGS.map(({ n, color, label, desc }) => (
-            <div key={n} className="rounded-xl p-3 flex flex-col gap-2 border"
-              style={{ background: `${color}10`, borderColor: `${color}35` }}
-            >
-              <div className="flex items-center gap-2">
-                <span className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-black text-white shrink-0" style={{ background: color }}>{n}</span>
-                <span className="text-xs font-semibold leading-snug" style={{ color: 'var(--color-text)' }}>{label}</span>
-              </div>
-              <p className="text-[11px] leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>{desc}</p>
-            </div>
-          ))}
         </div>
       </div>
 
