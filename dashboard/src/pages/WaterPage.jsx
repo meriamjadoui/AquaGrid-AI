@@ -4,7 +4,6 @@ import useStore from '../store/useStore'
 import KpiCard from '../components/UI/KpiCard'
 import GaugeRing from '../components/UI/GaugeRing'
 import AquaAreaChart from '../components/Charts/AreaChart'
-import AquaLineChart from '../components/Charts/LineChart'
 
 export default function WaterPage() {
   const { sensors, history, aiResults } = useStore()
@@ -21,42 +20,48 @@ export default function WaterPage() {
     <div className="space-y-6">
       <div>
         <h2 className="text-xl font-bold text-slate-100">Water Monitoring</h2>
-        <p className="text-sm text-slate-500 mt-0.5">Reservoir · flow rate · AI leak detection · pH quality</p>
+        <p className="text-sm text-slate-500 mt-0.5">Reservoir level · water flow · leak detection · water quality</p>
       </div>
 
-      {/* Gauges + KPIs */}
+      {/* Gauge + KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="card flex flex-col items-center py-6">
           <GaugeRing value={sensors.reservoirLevel} color="#2fb4b8" size={150} label="Reservoir Level" />
           <div className="mt-4 text-center">
-            <p className="text-xs text-slate-500">Capacity: ~50L community tank</p>
-            <p className={`text-xs mt-1 font-medium ${ sensors.reservoirLevel < 20 ? 'text-red-400' : sensors.reservoirLevel > 85 ? 'text-amber-400' : 'text-emerald-400' }`}>
-              {sensors.reservoirLevel < 20 ? '⚠ Low — refill needed' : sensors.reservoirLevel > 85 ? '⚠ Near full' : '✓ Normal range'}
+            <p className="text-xs text-slate-500">Community tank — ~50L capacity</p>
+            <p className={`text-xs mt-1 font-medium ${
+              sensors.reservoirLevel < 20 ? 'text-red-400'
+              : sensors.reservoirLevel > 85 ? 'text-amber-400'
+              : 'text-emerald-400'
+            }`}>
+              {sensors.reservoirLevel < 20 ? '⚠ Low — refill needed'
+               : sensors.reservoirLevel > 85 ? '⚠ Almost full'
+               : '✓ Good level'}
             </p>
           </div>
         </div>
 
         <div className="md:col-span-2 grid grid-cols-2 gap-3">
           <KpiCard label="Flow Rate" value={sensors.flowRate} unit="L/min" icon={Droplets} color="text-water" />
-          <KpiCard label="Today Consumed" value={sensors.totalConsumed} unit="L" icon={Waves} color="text-water" />
+          <KpiCard label="Used Today" value={sensors.totalConsumed} unit="L" icon={Waves} color="text-water" />
           <KpiCard
-            label="AI Leak Risk"
+            label="Leak Risk"
             value={`${aiLeakRisk.toFixed(0)}%`}
             icon={AlertTriangle}
             color={leak.isLeak ? 'text-red-400' : aiLeakRisk > 20 ? 'text-amber-400' : 'text-emerald-400'}
             badge={{
               type: leak.isLeak ? 'alert' : aiLeakRisk > 20 ? 'warn' : 'ok',
-              label: leak.isLeak ? 'Leak RF: YES' : aiLeakRisk > 20 ? 'Monitor' : 'Clear'
+              label: leak.isLeak ? 'Leak Detected' : aiLeakRisk > 20 ? 'Monitor' : 'All Clear'
             }}
           />
           <KpiCard
-            label="pH Quality"
-            value={ph.contaminated ? 'Risk' : 'OK'}
+            label="Water Quality"
+            value={ph.contaminated ? 'At Risk' : 'Safe'}
             icon={FlaskConical}
             color={ph.contaminated ? 'text-red-400' : 'text-emerald-400'}
             badge={{
               type: ph.contaminated ? 'alert' : 'ok',
-              label: ph.contaminated ? 'Contamination' : 'Safe'
+              label: ph.contaminated ? 'Check Water' : 'Safe to Use'
             }}
           />
         </div>
@@ -65,32 +70,52 @@ export default function WaterPage() {
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className="card">
-          <h3 className="text-sm font-semibold text-slate-300 mb-4">Reservoir Level — 24h</h3>
+          <h3 className="text-sm font-semibold text-slate-300 mb-4">Reservoir Level — Last 24 Hours</h3>
           <AquaAreaChart data={data} dataKey="reservoir" color="#2fb4b8" unit="%" height={200} />
         </div>
         <div className="card">
-          <h3 className="text-sm font-semibold text-slate-300 mb-4">Flow Rate — 24h (L/min)</h3>
+          <h3 className="text-sm font-semibold text-slate-300 mb-4">Water Flow — Last 24 Hours</h3>
           <AquaAreaChart data={data} dataKey="flow" color="#01696f" unit=" L/min" height={200} />
         </div>
       </div>
 
-      {/* AI Leak model details */}
+      {/* Status summary */}
       <div className="card">
-        <h3 className="text-sm font-semibold text-slate-300 mb-3">AI Leak Detection — Model Output</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
-          {[
-            { step: '1', title: 'Loss Ratio', desc: `Inflow ${sensors.flowRate} L/min → lossRatio computed from flow vs reservoir delta` },
-            { step: '2', title: 'RF Inference', desc: `11-tree RandomForest on currentloss=${(sensors.flowRate * 0.05).toFixed(3)}, rollingMean=${leak.rollingMean?.toFixed(3)}, consecutiveHigh=${leak.consecutiveHigh}` },
-            { step: '3', title: 'Decision', desc: `Model output: ${leak.isLeak ? '🔴 LEAK DETECTED' : '✅ No leak'}. Risk score: ${aiLeakRisk.toFixed(0)}%` },
-          ].map(({ step, title, desc }) => (
-            <div key={step} className="flex gap-3 p-3 bg-surface-bg rounded-lg border border-surface-border">
-              <div className="w-6 h-6 rounded-full bg-primary-500/20 text-primary-400 text-xs flex items-center justify-center font-bold shrink-0">{step}</div>
-              <div>
-                <p className="font-medium text-slate-200">{title}</p>
-                <p className="text-slate-500 text-xs mt-0.5">{desc}</p>
-              </div>
+        <h3 className="text-sm font-semibold text-slate-300 mb-3">Current Status Summary</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="flex gap-3 p-3 bg-surface-bg rounded-lg border border-surface-border">
+            <div className={`w-2 rounded-full shrink-0 ${ sensors.reservoirLevel < 20 ? 'bg-red-400' : 'bg-emerald-400' }`} />
+            <div>
+              <p className="text-sm font-medium text-slate-200">Reservoir</p>
+              <p className="text-xs text-slate-500 mt-0.5">
+                {sensors.reservoirLevel < 20
+                  ? 'Low — schedule a refill as soon as possible.'
+                  : `At ${sensors.reservoirLevel}% — no action needed.`}
+              </p>
             </div>
-          ))}
+          </div>
+          <div className="flex gap-3 p-3 bg-surface-bg rounded-lg border border-surface-border">
+            <div className={`w-2 rounded-full shrink-0 ${ leak.isLeak ? 'bg-red-400' : 'bg-emerald-400' }`} />
+            <div>
+              <p className="text-sm font-medium text-slate-200">Pipeline</p>
+              <p className="text-xs text-slate-500 mt-0.5">
+                {leak.isLeak
+                  ? 'Possible leak detected. Inspect the pipeline.'
+                  : 'No leaks detected. Pipeline is healthy.'}
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-3 p-3 bg-surface-bg rounded-lg border border-surface-border">
+            <div className={`w-2 rounded-full shrink-0 ${ ph.contaminated ? 'bg-red-400' : 'bg-emerald-400' }`} />
+            <div>
+              <p className="text-sm font-medium text-slate-200">Water Quality</p>
+              <p className="text-xs text-slate-500 mt-0.5">
+                {ph.contaminated
+                  ? 'Quality outside safe range. Do not use for drinking.'
+                  : 'Safe for drinking. Quality is within normal range.'}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
