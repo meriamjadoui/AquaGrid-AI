@@ -1,5 +1,5 @@
 import React from 'react'
-import { Droplets, Waves, AlertTriangle } from 'lucide-react'
+import { Droplets, Waves, AlertTriangle, FlaskConical } from 'lucide-react'
 import useStore from '../store/useStore'
 import KpiCard from '../components/UI/KpiCard'
 import GaugeRing from '../components/UI/GaugeRing'
@@ -7,14 +7,21 @@ import AquaAreaChart from '../components/Charts/AreaChart'
 import AquaLineChart from '../components/Charts/LineChart'
 
 export default function WaterPage() {
-  const { sensors, history } = useStore()
+  const { sensors, history, aiResults } = useStore()
   const data = history.slice(-24)
+
+  const leak = aiResults.leak
+  const ph   = aiResults.ph
+
+  const aiLeakRisk = leak.isLeak
+    ? Math.max(sensors.leakRisk, 60)
+    : Math.min(sensors.leakRisk, 30)
 
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-xl font-bold text-slate-100">Water Monitoring</h2>
-        <p className="text-sm text-slate-500 mt-0.5">Reservoir, flow rate, leak detection</p>
+        <p className="text-sm text-slate-500 mt-0.5">Reservoir · flow rate · AI leak detection · pH quality</p>
       </div>
 
       {/* Gauges + KPIs */}
@@ -33,17 +40,24 @@ export default function WaterPage() {
           <KpiCard label="Flow Rate" value={sensors.flowRate} unit="L/min" icon={Droplets} color="text-water" />
           <KpiCard label="Today Consumed" value={sensors.totalConsumed} unit="L" icon={Waves} color="text-water" />
           <KpiCard
-            label="Leak Risk (AI)"
-            value={`${sensors.leakRisk}%`}
+            label="AI Leak Risk"
+            value={`${aiLeakRisk.toFixed(0)}%`}
             icon={AlertTriangle}
-            color={sensors.leakRisk > 40 ? 'text-red-400' : sensors.leakRisk > 20 ? 'text-amber-400' : 'text-emerald-400'}
+            color={leak.isLeak ? 'text-red-400' : aiLeakRisk > 20 ? 'text-amber-400' : 'text-emerald-400'}
             badge={{
-              type: sensors.leakRisk > 40 ? 'alert' : sensors.leakRisk > 20 ? 'warn' : 'ok',
-              label: sensors.leakRisk > 40 ? 'High Risk' : sensors.leakRisk > 20 ? 'Monitor' : 'No Leak'
+              type: leak.isLeak ? 'alert' : aiLeakRisk > 20 ? 'warn' : 'ok',
+              label: leak.isLeak ? 'Leak RF: YES' : aiLeakRisk > 20 ? 'Monitor' : 'Clear'
             }}
           />
-          <KpiCard label="Flow Sensor" value="YF-S201" icon={Droplets} color="text-slate-400"
-            badge={{ type: 'ok', label: 'Calibrated' }}
+          <KpiCard
+            label="pH Quality"
+            value={ph.contaminated ? 'Risk' : 'OK'}
+            icon={FlaskConical}
+            color={ph.contaminated ? 'text-red-400' : 'text-emerald-400'}
+            badge={{
+              type: ph.contaminated ? 'alert' : 'ok',
+              label: ph.contaminated ? 'Contamination' : 'Safe'
+            }}
           />
         </div>
       </div>
@@ -60,14 +74,14 @@ export default function WaterPage() {
         </div>
       </div>
 
-      {/* Leak detection logic explainer */}
+      {/* AI Leak model details */}
       <div className="card">
-        <h3 className="text-sm font-semibold text-slate-300 mb-3">AI Leak Detection Logic</h3>
+        <h3 className="text-sm font-semibold text-slate-300 mb-3">AI Leak Detection — Model Output</h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
           {[
-            { step: '1', title: 'Measure Inflow', desc: `Flow sensor reads ${sensors.flowRate} L/min entering reservoir` },
-            { step: '2', title: 'Compare Level Δ', desc: 'AI compares expected vs actual reservoir level change' },
-            { step: '3', title: 'Alert if Anomaly', desc: `High flow + stable level → leak signal (current risk: ${sensors.leakRisk}%)` },
+            { step: '1', title: 'Loss Ratio', desc: `Inflow ${sensors.flowRate} L/min → lossRatio computed from flow vs reservoir delta` },
+            { step: '2', title: 'RF Inference', desc: `11-tree RandomForest on currentloss=${(sensors.flowRate * 0.05).toFixed(3)}, rollingMean=${leak.rollingMean?.toFixed(3)}, consecutiveHigh=${leak.consecutiveHigh}` },
+            { step: '3', title: 'Decision', desc: `Model output: ${leak.isLeak ? '🔴 LEAK DETECTED' : '✅ No leak'}. Risk score: ${aiLeakRisk.toFixed(0)}%` },
           ].map(({ step, title, desc }) => (
             <div key={step} className="flex gap-3 p-3 bg-surface-bg rounded-lg border border-surface-border">
               <div className="w-6 h-6 rounded-full bg-primary-500/20 text-primary-400 text-xs flex items-center justify-center font-bold shrink-0">{step}</div>
