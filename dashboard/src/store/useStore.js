@@ -180,10 +180,19 @@ const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches
 const initialTheme = savedTheme ?? (systemDark ? 'dark' : 'light')
 applyTheme(initialTheme)
 
+// ── Impact counters — accumulate over session ─────────────────────────────────
+const impactBase = {
+  waterSavedL:       0,        // litres saved from leak prevention
+  energySavedWh:     0,        // Wh saved from solar optimisation
+  pumpUptimeMin:     0,        // minutes pump ran successfully
+  leaksPreventedCount: 0,      // discrete leak events intercepted
+  monitoringDaysSeed: Math.floor(Math.random() * 180) + 30,  // simulated deployment age
+}
+
 const useStore = create((set, get) => {
   // Live sensor tick
   setInterval(() => {
-    const { sensors, history, pumpOn, aiResults, alerts } = get()
+    const { sensors, history, pumpOn, aiResults, alerts, impact } = get()
     const next = tickSensors(sensors, pumpOn)
     const { newAlerts, newAuditEvents } = generateAlerts(next, aiResults, alerts)
     const merged = [...newAlerts, ...alerts].slice(0, MAX_ALERTS)
@@ -191,7 +200,28 @@ const useStore = create((set, get) => {
       const record = useAuditLog.getState().record
       newAuditEvents.forEach(ev => record(ev))
     }
-    set({ sensors: next, history: appendHistory(history, next), alerts: merged, lastUpdated: new Date() })
+
+    // ── Update impact counters ──
+    const leakEvent = newAlerts.find(a => a.key === 'leak_detected')
+    const nextImpact = {
+      ...impact,
+      // Each tick: if pump on, accumulate uptime (TICK_MS in minutes)
+      pumpUptimeMin: impact.pumpUptimeMin + (pumpOn ? TICK_MS / 60000 : 0),
+      // Water saved: estimate 3 L/min prevented when a leak is caught early
+      waterSavedL: impact.waterSavedL + (aiResults.leak?.isLeak ? 0 : next.flowRate * (TICK_MS / 60000) * 0.02),
+      // Energy saved: delta between theoretical max solar and actual use
+      energySavedWh: impact.energySavedWh + Math.max(0, next.solarProduction - next.pumpPower) * (TICK_MS / 3600000),
+      // Leak intercepts
+      leaksPreventedCount: impact.leaksPreventedCount + (leakEvent ? 1 : 0),
+    }
+
+    set({
+      sensors: next,
+      history: appendHistory(history, next),
+      alerts: merged,
+      lastUpdated: new Date(),
+      impact: nextImpact,
+    })
   }, TICK_MS)
 
   return {
@@ -200,6 +230,7 @@ const useStore = create((set, get) => {
     alerts:      [],
     sidebarOpen: true,
     lastUpdated: new Date(),
+    impact:      { ...impactBase },
 
     // ── Theme ──
     theme: initialTheme,
