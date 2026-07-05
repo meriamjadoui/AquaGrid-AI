@@ -1,8 +1,50 @@
-// maintenance_model.js — RandomForest predictive maintenance
-// Input per completed pump session: { currentavg, flowavg, tempavg, efficiency, rollingslopecurrent, rollingslopeefficiency }
-// Returns: 0=healthy, 1=warning, 2=critical
-// makeMaintenanceDetector() → stateful session detector
+/**
+ * @file maintenance_model.js
+ * @description In-browser Random Forest predictive maintenance detector.
+ *
+ * ## What it does
+ * Classifies the current pump operating state into one of three health levels:
+ *   - **0 — Healthy**: normal operation, no action needed
+ *   - **1 — Warning**: degraded efficiency or rising current; schedule inspection
+ *   - **2 — Critical**: imminent failure risk; stop pump / alert operator
+ *
+ * ## Algorithm
+ * Random Forest — 15 decision trees trained on pump telemetry data.
+ * Each tree votes for a health class (0 / 1 / 2). The class with the
+ * most votes is returned (plurality voting).
+ *
+ * ## Features fed to each tree
+ * | Feature               | Description                                                  |
+ * |-----------------------|--------------------------------------------------------------|
+ * | currentavg            | Motor current draw this tick (A)                             |
+ * | flowavg               | Water flow rate this tick (L/min)                            |
+ * | tempavg               | Pump housing temperature (°C)                                |
+ * | efficiency            | currentavg / max(flowavg, 0.5) — current-per-litre ratio     |
+ * | rollingslopecurrent   | Linear trend of motor current over last MAINT_WINDOW ticks   |
+ * | rollingslopeefficiency| Linear trend of efficiency over last MAINT_WINDOW ticks      |
+ *
+ * **Key intuition**: a rising `rollingslopeefficiency` (the pump needs more
+ * current to move the same water) combined with high temperature is the
+ * earliest indicator of bearing wear or impeller damage.
+ *
+ * ## Usage
+ * ```js
+ * import { makeMaintenanceDetector } from './maintenance_model'
+ * const detect = makeMaintenanceDetector()           // create once
+ * const { state, label } = detect(current, flow, temp)
+ * // state: 0 | 1 | 2    label: 'healthy' | 'warning' | 'critical'
+ * ```
+ *
+ * @module maintenance_model
+ */
 
+/**
+ * Compute the least-squares slope of an array of values.
+ * Returns 0 for arrays shorter than 2 elements.
+ *
+ * @param {number[]} vals - Time-ordered array of numeric values.
+ * @returns {number} Slope (units per tick).
+ */
 function slope(vals) {
   if (vals.length < 2) return 0
   const n = vals.length
@@ -17,7 +59,9 @@ function slope(vals) {
   return den === 0 ? 0 : num / den
 }
 
-// 15 decision trees (mtree0..mtree14)
+// ─── 15 Decision Trees ───────────────────────────────────────────────────────
+// Returns 0 (healthy), 1 (warning), or 2 (critical).
+
 function mtree0(f){if(f.currentavg<2.21087){if(f.currentavg<2.06710){if(f.rollingslopeefficiency<-0.03705)return 1;else if(f.rollingslopeefficiency<-0.02116){if(f.tempavg<44.56876)return 0;else return 1;}else if(f.tempavg<44.73301)return 0;else return 0;}else if(f.tempavg<44.19658){if(f.efficiency<0.44190)return 0;else return 1;}else if(f.flowavg<7.03657){if(f.rollingslopecurrent<0.00348)return 1;else return 0;}else if(f.rollingslopecurrent<0.00410)return 0;else return 0;}else if(f.tempavg<50.12525){if(f.currentavg<2.57624){if(f.efficiency<0.35340)return 1;else return 1;}else if(f.currentavg<2.73260){if(f.rollingslopecurrent<0.04952)return 2;else return 1;}else return 2;}else if(f.currentavg<2.57624)return 2;else return 2;}
 function mtree1(f){if(f.currentavg<2.23118){if(f.tempavg<45.62606){if(f.efficiency<0.30608)return 0;else if(f.rollingslopecurrent<0.00132)return 1;else if(f.currentavg<2.08018)return 0;else return 0;}else if(f.currentavg<2.02770)return 1;else return 1;}else if(f.tempavg<50.24890){if(f.tempavg<48.51091){if(f.rollingslopecurrent<0.04836)return 1;else return 2;}else if(f.currentavg<2.57377)return 1;else return 2;}else if(f.flowavg<5.80098)return 2;else if(f.currentavg<2.60570)return 1;else return 2;}
 function mtree2(f){if(f.efficiency<0.37249){if(f.currentavg<2.14447){if(f.rollingslopeefficiency<-0.01843)return 0;else if(f.flowavg<6.31426)return 0;else return 0;}else if(f.currentavg<2.28757)return 1;else if(f.flowavg<7.56211)return 1;else return 1;}else if(f.efficiency<0.48731){if(f.currentavg<2.55016){if(f.rollingslopeefficiency<-0.03875)return 2;else return 1;}else if(f.tempavg<50.33182)return 2;else return 2;}else if(f.tempavg<49.98672)return 2;else return 2;}
@@ -34,31 +78,69 @@ function mtree12(f){if(f.rollingslopeefficiency<-0.01491){if(f.flowavg<5.90898)r
 function mtree13(f){if(f.efficiency<0.37966){if(f.currentavg<2.15217)return 0;else return 1;}else if(f.efficiency<0.50139)return 1;else return 2;}
 function mtree14(f){if(f.efficiency<0.37686){if(f.efficiency<0.31242)return 0;else return 1;}else if(f.flowavg<4.98009)return 1;else return 2;}
 
+// ─── Ensemble voting ─────────────────────────────────────────────────────────
+
+/**
+ * Run all 15 trees and return the plurality class.
+ *
+ * @param {{
+ *   currentavg: number,
+ *   flowavg: number,
+ *   tempavg: number,
+ *   efficiency: number,
+ *   rollingslopecurrent: number,
+ *   rollingslopeefficiency: number
+ * }} f - Pre-engineered feature object.
+ * @returns {0|1|2} Pump health class.
+ */
 export function predictMaintenance(f) {
-  const votes = [mtree0,mtree1,mtree2,mtree3,mtree4,mtree5,mtree6,mtree7,mtree8,mtree9,mtree10,mtree11,mtree12,mtree13,mtree14].map(t => t(f))
+  const votes  = [mtree0,mtree1,mtree2,mtree3,mtree4,mtree5,mtree6,mtree7,mtree8,mtree9,mtree10,mtree11,mtree12,mtree13,mtree14].map(t => t(f))
   const counts = [0, 0, 0]
   votes.forEach(v => counts[v]++)
-  return counts.indexOf(Math.max(...counts)) // 0=healthy,1=warning,2=critical
+  return counts.indexOf(Math.max(...counts)) // 0=healthy, 1=warning, 2=critical
 }
 
+// ─── Stateful detector factory ───────────────────────────────────────────────
+
+/** Number of ticks kept in each rolling window. */
 const MAINT_WINDOW = 5
+
+/**
+ * Create a stateful maintenance detector that tracks its own rolling windows
+ * for current and efficiency trends.
+ *
+ * @returns {(current: number, flow: number, temp: number) => { state: 0|1|2, label: string }}
+ *   Detection function. Call on every sensor tick.
+ *
+ * @example
+ * const detect = makeMaintenanceDetector()
+ * const { state, label } = detect(pumpMotorCurrent, flowRate, pumpTemp)
+ * // label: 'healthy' | 'warning' | 'critical'
+ */
 export function makeMaintenanceDetector() {
+  /** @type {number[]} Recent motor current values. */
   let currents = []
+  /** @type {number[]} Recent efficiency (A / (L/min)) values. */
   let effs = []
+
   return function detect(current, flow, temp) {
     const efficiency = current / Math.max(flow, 0.5)
+
+    // Update rolling windows
     currents.push(current)
     effs.push(efficiency)
     if (currents.length > MAINT_WINDOW) currents.shift()
     if (effs.length > MAINT_WINDOW) effs.shift()
+
     const state = predictMaintenance({
-      currentavg: current,
-      flowavg: flow,
-      tempavg: temp,
+      currentavg:            current,
+      flowavg:               flow,
+      tempavg:               temp,
       efficiency,
-      rollingslopecurrent: slope(currents),
+      rollingslopecurrent:    slope(currents),
       rollingslopeefficiency: slope(effs),
     })
+
     return { state, label: ['healthy', 'warning', 'critical'][state] }
   }
 }
