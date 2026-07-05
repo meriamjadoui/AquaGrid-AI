@@ -16,14 +16,6 @@ const NAV = [
   { to: '/audit',    icon: ClipboardList,   label: 'Audit Log'    },
 ]
 
-const SDGS = [
-  { n: 6,  color: '#26BDE2', title: 'Clean Water' },
-  { n: 7,  color: '#FCC30B', title: 'Clean Energy' },
-  { n: 9,  color: '#FD6925', title: 'Innovation' },
-  { n: 11, color: '#FD9D24', title: 'Sust. Cities' },
-  { n: 13, color: '#3F7E44', title: 'Climate Action' },
-]
-
 export default function Sidebar() {
   const { sidebarOpen, toggleSidebar, alerts } = useStore()
   const unread = alerts.filter(a => !a.read).length
@@ -39,7 +31,6 @@ export default function Sidebar() {
       {/* Logo */}
       <div className="flex items-center gap-3 px-4 py-4 border-b" style={{ borderColor: 'var(--color-surface-border)' }}>
         <div className="shrink-0">
-          {/* AquaWise droplet + sun logo */}
           <svg viewBox="0 0 36 36" fill="none" className="w-8 h-8" aria-label="AquaWise logo">
             <rect width="36" height="36" rx="10" fill="#0d8fae"/>
             <path d="M18 6 C13 12 7 15 7 21 C7 25.9 12 31 18 31 C24 31 29 25.9 29 21 C29 15 23 12 18 6Z"
@@ -89,25 +80,6 @@ export default function Sidebar() {
           </NavLink>
         ))}
       </nav>
-
-      {/* SDG badges */}
-      {sidebarOpen && (
-        <div className="px-3 pb-3">
-          <p className="text-[9px] uppercase tracking-widest font-semibold mb-2" style={{ color: 'var(--color-text-faint)' }}>UN SDG Aligned</p>
-          <div className="flex flex-wrap gap-1">
-            {SDGS.map(({ n, color, title }) => (
-              <span
-                key={n}
-                className="sdg-pill"
-                style={{ background: color }}
-                title={`SDG ${n}: ${title}`}
-              >
-                {n}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Bottom */}
       <div className="px-2 py-3 border-t" style={{ borderColor: 'var(--color-surface-border)' }}>

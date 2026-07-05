@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
-import { RefreshCw, BellRing, Sun, Moon } from 'lucide-react'
+import { RefreshCw, Sun, Moon } from 'lucide-react'
 import useStore from '../../store/useStore'
 import { formatDistanceToNow } from 'date-fns'
 
@@ -16,8 +16,7 @@ const PAGE_TITLES = {
 
 export default function TopBar() {
   const { pathname } = useLocation()
-  const { lastUpdated, refreshSensors, alerts, theme, toggleTheme } = useStore()
-  const unread = alerts.filter(a => !a.read).length
+  const { lastUpdated, refreshSensors, theme, toggleTheme } = useStore()
 
   useEffect(() => {
     const t = setInterval(refreshSensors, 10_000)
@@ -59,11 +58,7 @@ export default function TopBar() {
         }
       </button>
 
-      <button className="relative btn-ghost p-2" aria-label="Notifications">
-        <BellRing size={15} />
-        {unread > 0 && <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />}
-      </button>
-
+      {/* Avatar */}
       <div className="flex items-center gap-2 pl-2 border-l" style={{ borderColor: 'var(--color-surface-border)' }}>
         <div
           className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
