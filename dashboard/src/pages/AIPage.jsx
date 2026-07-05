@@ -42,7 +42,7 @@ export default function AIPage() {
       ring: maintHealthScore,
       ringColor: '#8b5cf6',
       status: maint.state === 0 ? 'ok' : maint.state === 1 ? 'warn' : 'alert',
-      statusLabel: maint.state === 0 ? 'All Good' : maint.state === 1 ? 'Check Soon' : '🔴 Needs Attention',
+      statusLabel: maint.state === 0 ? 'All Good' : maint.state === 1 ? 'Check Soon' : '🔴 ',
       desc: maint.state === 0
         ? `Pump is running well. Temperature ${sensors.pumpTemp}°C and power draw are within normal limits.`
         : maint.state === 1
