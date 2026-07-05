@@ -1,12 +1,12 @@
-# 🌊⚡ AquaGrid AI
+# AquaGrid AI
 
-> **Smart Solar Water Management System** — IoT + AI + React Dashboard
+**Smart Solar Water Management System — IoT, AI, and Real-Time Dashboard**
 
-AquaGrid AI is an intelligent monitoring platform for solar-powered water infrastructure in rural communities (Tunisia/Africa). It connects water management, solar energy, and AI-driven analytics into a single unified dashboard.
+AquaGrid AI is an intelligent monitoring platform designed for solar-powered water infrastructure in rural communities across Tunisia and Africa. The system integrates water management, solar energy tracking, and AI-driven analytics into a single, unified interface — enabling communities to supervise critical resources without requiring on-site technical expertise.
 
 ---
 
-## 🏗️ Project Structure
+## Project Structure
 
 ```
 AquaGrid-AI/
@@ -20,35 +20,41 @@ AquaGrid-AI/
 │   ├── public/
 │   ├── package.json
 │   └── vite.config.js
-├── ai/                 # AI models & anomaly detection
-├── prototype/          # ESP32 firmware & hardware docs
-└── docs/               # Architecture & API docs
+├── ai/                 # AI models and anomaly detection
+├── prototype/          # ESP32 firmware and hardware documentation
+└── docs/               # Architecture and API documentation
 ```
 
 ---
 
-## 🧩 System Layers
+## System Architecture
 
-| Layer | Technology | Role |
-|-------|-----------|------|
-| **Layer 1** — Sensors | YF-S201, HC-SR04, INA219, DS18B20 | Data acquisition |
-| **Layer 2** — IoT Controller | ESP32 (WiFi + BLE) | Read sensors, send data, control pump |
-| **Layer 3** — AI Engine | Python / TensorFlow Lite | Leak detection, predictive maintenance, energy optimization |
-| **Layer 4** — Dashboard | React + Vite + Recharts | Real-time monitoring interface |
+The platform is organized into four distinct layers, each responsible for a specific concern:
 
----
-
-## 📊 Dashboard Features
-
-- **Water Section**: Reservoir level, flow rate, total consumption
-- **Energy Section**: Solar production, battery charge, pump consumption
-- **AI Section**: Leak risk score, pump health, anomaly alerts
-- **Alerts**: Real-time notifications (overflow, leak, low battery, pump failure)
-- **Responsive**: Mobile-first, dark/light mode
+| Layer | Technology | Responsibility |
+|-------|------------|----------------|
+| Sensor Layer | YF-S201, HC-SR04, INA219, DS18B20 | Field data acquisition |
+| IoT Controller | ESP32 (WiFi + BLE) | Sensor reading, data transmission, pump control |
+| AI Engine | Python, TensorFlow Lite | Leak detection, predictive maintenance, energy optimization |
+| Dashboard | React, Vite, Recharts | Real-time monitoring and alerting interface |
 
 ---
 
-## 🚀 Quick Start (Dashboard)
+## Dashboard Features
+
+The web dashboard provides a consolidated view of the system across three main domains:
+
+- **Water Monitoring**: Reservoir level, flow rate, and total consumption tracking
+- **Energy Monitoring**: Solar production output, battery charge state, and pump energy consumption
+- **AI Insights**: Leak risk scoring, pump health index, and anomaly detection alerts
+- **Alert System**: Real-time notifications for overflow events, detected leaks, low battery, and pump failures
+- **Responsive Design**: Mobile-first layout with support for dark and light modes
+
+---
+
+## Getting Started
+
+To run the dashboard locally, make sure Node.js is installed, then execute the following:
 
 ```bash
 cd dashboard
@@ -56,39 +62,38 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173)
+The application will be available at [http://localhost:5173](http://localhost:5173).
 
 ---
 
-## 🛠️ Tech Stack
+## Technology Stack
 
-- **Frontend**: React 18, Vite, Tailwind CSS v3, Recharts, Lucide React
-- **State**: Zustand
-- **IoT Backend**: Firebase Realtime DB / MQTT
-- **AI**: Python, scikit-learn, TensorFlow Lite (Edge AI on ESP32)
-- **Hardware**: ESP32, Solar panel 20-50W, 12V pump, 12V battery
-
----
-
-## 💡 Key Innovation — Water-Energy Nexus
-
-AquaGrid AI is the **only open-source IoT platform** that simultaneously monitors:
-- 💧 Water (reservoir, flow, leaks)
-- ☀️ Solar energy (production, battery storage)
-- 🤖 AI predictions (pump health, leak detection, energy optimization)
-
-**Cost**: ~100–120 TND prototype vs. 50× more expensive enterprise alternatives (Grundfos, Xylem)
+| Domain | Tools and Frameworks |
+|--------|----------------------|
+| Frontend | React 18, Vite, Tailwind CSS v3, Recharts, Lucide React |
+| State Management | Zustand |
+| IoT Backend | Firebase Realtime Database / MQTT |
+| AI / ML | Python, scikit-learn, TensorFlow Lite (Edge AI on ESP32) |
+| Hardware | ESP32, 20–50W solar panel, 12V pump, 12V battery |
 
 ---
 
-## 📍 Target Communities
+## Core Value Proposition
 
-- Rural villages, schools, and farms in Tunisia and Africa
-- Communities using boreholes + solar pumps without supervision
+AquaGrid AI addresses a gap that existing enterprise solutions leave largely unserved: affordable, open-source infrastructure monitoring for off-grid communities. The platform simultaneously tracks water, energy, and equipment health in a single system — a combination not commonly found in open-source tooling.
+
+The estimated hardware cost for a functional prototype sits between 100 and 120 TND, compared to commercial alternatives from vendors such as Grundfos or Xylem that can cost significantly more. This makes deployment viable for rural villages, schools, and agricultural operations that rely on borehole pumps and solar energy without permanent technical supervision.
 
 ---
 
-## 👩‍💻 Author
+## Target Use Cases
 
-**Meriam Jadoui** — Cloud Engineer | Full-Stack Dev  
-📧 Meriam.Jadoui@esprit.tn | 📍 Tunis, TN
+- Rural villages and farming communities in Tunisia and across Africa
+- Off-grid schools and public facilities using solar-powered water infrastructure
+- Development organizations and NGOs seeking low-cost water monitoring solutions
+
+---
+
+## License
+
+This project is open-source. Contributions and feedback are welcome.

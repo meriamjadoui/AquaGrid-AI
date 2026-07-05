@@ -4,7 +4,7 @@ import { generateSensorData, generateHistoryData } from '../utils/mockData'
 const useStore = create((set, get) => ({
   // Live sensor readings
   sensors: generateSensorData(),
-  history: generateHistoryData(48), // 48h of hourly data
+  history: generateHistoryData(48),
   alerts: [
     { id: 1, type: 'warn',  time: '12:43', message: 'Battery level below 30% — consider reducing pump runtime', read: false },
     { id: 2, type: 'ok',    time: '11:20', message: 'Reservoir refill complete — level at 87%', read: true },
@@ -14,6 +14,17 @@ const useStore = create((set, get) => ({
   ],
   sidebarOpen: true,
   lastUpdated: new Date(),
+
+  // AI results (populated by useAIEngine hook)
+  aiResults: {
+    leak:          { isLeak: false, rollingMean: 0, consecutiveHigh: 0 },
+    maintenance:   { state: 0, label: 'healthy' },
+    ph:            { contaminated: false, deviation: 0, rollingMean: 0 },
+    panel:         { needsCleaning: false, ratio: null },
+    solarForecast: 0,
+    panelSoiled:   false,
+  },
+  setAiResults: (results) => set({ aiResults: results }),
 
   // Actions
   toggleSidebar: () => set(s => ({ sidebarOpen: !s.sidebarOpen })),
