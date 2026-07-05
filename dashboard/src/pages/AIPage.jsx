@@ -8,10 +8,11 @@ export default function AIPage() {
   const { sensors, history, aiResults } = useStore()
   const data = history.slice(-24)
 
-  const leak  = aiResults.leak
-  const maint = aiResults.maintenance
-  const ph    = aiResults.ph
-  const panel = aiResults.panel
+  const leak  = aiResults?.leak        ?? { isLeak: false, confidence: 0 }
+  const maint = aiResults?.maintenance  ?? { state: 0 }
+  const ph    = aiResults?.ph           ?? { contaminated: false, deviationScore: 0 }
+  const panel = aiResults?.panel        ?? { needsCleaning: false }
+  const solarForecast = aiResults?.solarForecast ?? sensors.solarProduction
 
   const maintHealthScore = maint.state === 0 ? sensors.pumpHealthScore
     : maint.state === 1 ? Math.min(sensors.pumpHealthScore, 70)
@@ -57,8 +58,8 @@ export default function AIPage() {
       status: sensors.solarProduction > 50 ? 'ok' : 'warn',
       statusLabel: sensors.solarProduction > 50 ? 'Peak Window Active' : 'Low Solar',
       desc: panel.needsCleaning
-        ? `Solar panel may need cleaning — output is lower than expected. Next-hour estimate: ~${aiResults.solarForecast?.toFixed(0) ?? '?'}W.`
-        : `Solar generating ${sensors.solarProduction}W. Estimated next hour: ~${aiResults.solarForecast?.toFixed(0) ?? '?'}W. Panel is clean.`,
+        ? `Solar panel may need cleaning — output is lower than expected. Next-hour estimate: ~${solarForecast.toFixed(0)}W.`
+        : `Solar generating ${sensors.solarProduction}W. Estimated next hour: ~${solarForecast.toFixed(0)}W. Panel is clean.`,
     },
     {
       icon: Droplets,

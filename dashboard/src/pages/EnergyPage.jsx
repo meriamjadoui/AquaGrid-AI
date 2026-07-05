@@ -10,8 +10,8 @@ export default function EnergyPage() {
   const { sensors, history, aiResults } = useStore()
   const data = history.slice(-24)
 
-  const panel = aiResults.panel
-  const solarForecast = aiResults.solarForecast ?? sensors.solarProduction
+  const panel        = aiResults?.panel        ?? { needsCleaning: false }
+  const solarForecast = aiResults?.solarForecast ?? sensors.solarProduction
 
   return (
     <div className="space-y-6">
