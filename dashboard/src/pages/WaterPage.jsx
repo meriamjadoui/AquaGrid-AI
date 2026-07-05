@@ -19,8 +19,10 @@ export default function WaterPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-bold text-slate-100">Water Monitoring</h2>
-        <p className="text-sm text-slate-500 mt-0.5">Reservoir level · water flow · leak detection · water quality</p>
+        <h2 className="text-xl font-bold" style={{ color: 'var(--color-text)' }}>Water Monitoring</h2>
+        <p className="text-sm mt-0.5" style={{ color: 'var(--color-text-muted)' }}>
+          Reservoir level · water flow · leak detection · water quality
+        </p>
       </div>
 
       {/* Gauge + KPIs */}
@@ -28,7 +30,7 @@ export default function WaterPage() {
         <div className="card flex flex-col items-center py-6">
           <GaugeRing value={sensors.reservoirLevel} color="#2fb4b8" size={150} label="Reservoir Level" />
           <div className="mt-4 text-center">
-            <p className="text-xs text-slate-500">Community tank — ~50L capacity</p>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-muted)' }}>Community tank — ~50L capacity</p>
             <p className={`text-xs mt-1 font-medium ${
               sensors.reservoirLevel < 20 ? 'text-red-400'
               : sensors.reservoirLevel > 85 ? 'text-amber-400'
@@ -70,52 +72,57 @@ export default function WaterPage() {
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className="card">
-          <h3 className="text-sm font-semibold text-slate-300 mb-4">Reservoir Level — Last 24 Hours</h3>
+          <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--color-text)' }}>Reservoir Level — Last 24 Hours</h3>
           <AquaAreaChart data={data} dataKey="reservoir" color="#2fb4b8" unit="%" height={200} />
         </div>
         <div className="card">
-          <h3 className="text-sm font-semibold text-slate-300 mb-4">Water Flow — Last 24 Hours</h3>
+          <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--color-text)' }}>Water Flow — Last 24 Hours</h3>
           <AquaAreaChart data={data} dataKey="flow" color="#01696f" unit=" L/min" height={200} />
         </div>
       </div>
 
       {/* Status summary */}
       <div className="card">
-        <h3 className="text-sm font-semibold text-slate-300 mb-3">Current Status Summary</h3>
+        <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--color-text)' }}>Current Status Summary</h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div className="flex gap-3 p-3 bg-surface-bg rounded-lg border border-surface-border">
-            <div className={`w-2 rounded-full shrink-0 ${ sensors.reservoirLevel < 20 ? 'bg-red-400' : 'bg-emerald-400' }`} />
-            <div>
-              <p className="text-sm font-medium text-slate-200">Reservoir</p>
-              <p className="text-xs text-slate-500 mt-0.5">
-                {sensors.reservoirLevel < 20
-                  ? 'Low — schedule a refill as soon as possible.'
-                  : `At ${sensors.reservoirLevel}% — no action needed.`}
-              </p>
+          {[
+            {
+              ok: sensors.reservoirLevel >= 20,
+              title: 'Reservoir',
+              desc: sensors.reservoirLevel < 20
+                ? 'Low — schedule a refill as soon as possible.'
+                : `At ${sensors.reservoirLevel}% — no action needed.`,
+            },
+            {
+              ok: !leak.isLeak,
+              title: 'Pipeline',
+              desc: leak.isLeak
+                ? 'Possible leak detected. Inspect the pipeline.'
+                : 'No leaks detected. Pipeline is healthy.',
+            },
+            {
+              ok: !ph.contaminated,
+              title: 'Water Quality',
+              desc: ph.contaminated
+                ? 'Quality outside safe range. Do not use for drinking.'
+                : 'Safe for drinking. Quality is within normal range.',
+            },
+          ].map(item => (
+            <div
+              key={item.title}
+              className="flex gap-3 p-3 rounded-lg"
+              style={{
+                background: 'var(--color-surface-bg)',
+                border: '1px solid var(--color-surface-border)',
+              }}
+            >
+              <div className={`w-2 rounded-full shrink-0 ${item.ok ? 'bg-emerald-400' : 'bg-red-400'}`} />
+              <div>
+                <p className="text-sm font-medium" style={{ color: 'var(--color-text)' }}>{item.title}</p>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-muted)' }}>{item.desc}</p>
+              </div>
             </div>
-          </div>
-          <div className="flex gap-3 p-3 bg-surface-bg rounded-lg border border-surface-border">
-            <div className={`w-2 rounded-full shrink-0 ${ leak.isLeak ? 'bg-red-400' : 'bg-emerald-400' }`} />
-            <div>
-              <p className="text-sm font-medium text-slate-200">Pipeline</p>
-              <p className="text-xs text-slate-500 mt-0.5">
-                {leak.isLeak
-                  ? 'Possible leak detected. Inspect the pipeline.'
-                  : 'No leaks detected. Pipeline is healthy.'}
-              </p>
-            </div>
-          </div>
-          <div className="flex gap-3 p-3 bg-surface-bg rounded-lg border border-surface-border">
-            <div className={`w-2 rounded-full shrink-0 ${ ph.contaminated ? 'bg-red-400' : 'bg-emerald-400' }`} />
-            <div>
-              <p className="text-sm font-medium text-slate-200">Water Quality</p>
-              <p className="text-xs text-slate-500 mt-0.5">
-                {ph.contaminated
-                  ? 'Quality outside safe range. Do not use for drinking.'
-                  : 'Safe for drinking. Quality is within normal range.'}
-              </p>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
     </div>

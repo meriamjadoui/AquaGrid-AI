@@ -16,8 +16,8 @@ export default function EnergyPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-bold text-slate-100">Energy Management</h2>
-        <p className="text-sm text-slate-500 mt-0.5">Solar production · battery level · pump consumption</p>
+        <h2 className="text-xl font-bold" style={{ color: 'var(--color-text)' }}>Energy Management</h2>
+        <p className="text-sm mt-0.5" style={{ color: 'var(--color-text-muted)' }}>Solar production · battery level · pump consumption</p>
       </div>
 
       {/* Gauges */}
@@ -32,10 +32,7 @@ export default function EnergyPage() {
           <GaugeRing value={sensors.pumpPower} max={100} color="#8b5cf6" label="Pump (W)" unit="W" />
         </div>
         <div className="card flex flex-col items-center py-4">
-          <GaugeRing
-            value={Math.min(100, Math.max(0, solarForecast))}
-            max={100} color="#2fb4b8" label="Next Hour" unit="W"
-          />
+          <GaugeRing value={Math.min(100, Math.max(0, solarForecast))} max={100} color="#2fb4b8" label="Next Hour" unit="W" />
         </div>
       </div>
 
@@ -64,23 +61,23 @@ export default function EnergyPage() {
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className="card">
-          <h3 className="text-sm font-semibold text-slate-300 mb-4">Solar Production — Last 24 Hours</h3>
+          <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--color-text)' }}>Solar Production — Last 24 Hours</h3>
           <AquaAreaChart data={data} dataKey="solar" color="#f59e0b" unit="W" height={200} />
         </div>
         <div className="card">
-          <h3 className="text-sm font-semibold text-slate-300 mb-4">Battery vs Pump — Last 24 Hours</h3>
+          <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--color-text)' }}>Battery vs Pump — Last 24 Hours</h3>
           <AquaLineChart data={data} lines={['battery', 'pumpPower']} height={200} />
         </div>
       </div>
 
       {/* Recommendations */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="card border-solar/20 bg-solar/5">
+        <div className="card" style={{ borderColor: 'rgba(245,158,11,0.2)', background: 'rgba(245,158,11,0.04)' }}>
           <div className="flex items-start gap-3">
             <Sun size={18} className="text-solar shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm font-semibold text-slate-200">Solar Forecast</p>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>Solar Forecast</p>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-muted)' }}>
                 Expected solar output next hour: <span className="text-solar font-semibold">{solarForecast.toFixed(0)}W</span>.
                 {solarForecast > 50
                   ? ' Good conditions — ideal time to run the pump.'
@@ -89,12 +86,15 @@ export default function EnergyPage() {
             </div>
           </div>
         </div>
-        <div className={`card ${panel.needsCleaning ? 'border-amber-500/20 bg-amber-500/5' : ''}`}>
+        <div
+          className="card"
+          style={panel.needsCleaning ? { borderColor: 'rgba(245,158,11,0.2)', background: 'rgba(245,158,11,0.04)' } : {}}
+        >
           <div className="flex items-start gap-3">
-            <Sparkles size={18} className={panel.needsCleaning ? 'text-amber-400' : 'text-slate-400'} />
+            <Sparkles size={18} className={panel.needsCleaning ? 'text-amber-400' : 'text-primary-400'} />
             <div>
-              <p className="text-sm font-semibold text-slate-200">Solar Panel Condition</p>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>Solar Panel Condition</p>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-muted)' }}>
                 {panel.needsCleaning
                   ? 'The solar panel may be dirty and producing less energy than expected. Wipe the panel surface to restore full output.'
                   : 'The solar panel is clean and performing well. No action needed.'}

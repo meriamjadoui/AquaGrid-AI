@@ -79,8 +79,8 @@ export default function AIPage() {
       <div className="flex items-center gap-3">
         <BrainCircuit size={22} className="text-primary-400" />
         <div>
-          <h2 className="text-xl font-bold text-slate-100">Smart Monitoring</h2>
-          <p className="text-sm text-slate-500 mt-0.5">Your system is being monitored automatically — 24/7</p>
+          <h2 className="text-xl font-bold" style={{ color: 'var(--color-text)' }}>Smart Monitoring</h2>
+          <p className="text-sm mt-0.5" style={{ color: 'var(--color-text-muted)' }}>Your system is being monitored automatically — 24/7</p>
         </div>
       </div>
 
@@ -90,20 +90,20 @@ export default function AIPage() {
           <div key={card.title} className="card space-y-4">
             <div className="flex items-center gap-2">
               <card.icon size={16} className={card.color} />
-              <h3 className="text-sm font-semibold text-slate-200">{card.title}</h3>
+              <h3 className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>{card.title}</h3>
               <span className={`ml-auto badge-${card.status}`}>{card.statusLabel}</span>
             </div>
             <div className="flex justify-center">
               <GaugeRing value={card.ring} color={card.ringColor} size={130} />
             </div>
-            <p className="text-xs text-slate-400 leading-relaxed">{card.desc}</p>
+            <p className="text-xs leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>{card.desc}</p>
           </div>
         ))}
       </div>
 
       {/* 24h chart */}
       <div className="card">
-        <h3 className="text-sm font-semibold text-slate-300 mb-4">System Activity — Last 24 Hours</h3>
+        <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--color-text)' }}>System Activity — Last 24 Hours</h3>
         <AquaLineChart data={data} lines={['leakRisk', 'battery', 'solar']} height={240} />
       </div>
 
@@ -111,15 +111,15 @@ export default function AIPage() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="card text-center">
           <p className="text-water font-bold text-2xl data-value">{sensors.reservoirLevel}%</p>
-          <p className="text-slate-500 text-xs mt-1">Water stored</p>
+          <p className="text-xs mt-1" style={{ color: 'var(--color-text-muted)' }}>Water stored</p>
         </div>
         <div className="card text-center">
           <p className="text-solar font-bold text-2xl data-value">{sensors.solarProduction}W</p>
-          <p className="text-slate-500 text-xs mt-1">Solar right now</p>
+          <p className="text-xs mt-1" style={{ color: 'var(--color-text-muted)' }}>Solar right now</p>
         </div>
         <div className="card text-center">
           <p className="text-battery font-bold text-2xl data-value">{sensors.batteryCharge}%</p>
-          <p className="text-slate-500 text-xs mt-1">Battery charge</p>
+          <p className="text-xs mt-1" style={{ color: 'var(--color-text-muted)' }}>Battery charge</p>
         </div>
       </div>
     </div>
