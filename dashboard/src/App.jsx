@@ -8,7 +8,7 @@ import AIPage from './pages/AIPage'
 import AlertsPage from './pages/AlertsPage'
 import AuditPage from './pages/AuditPage'
 import SettingsPage from './pages/SettingsPage'
-import useAIEngine from './ai/useAIEngine'
+import { useAIEngine } from './ai/useAIEngine'
 import useStore from './store/useStore'
 import useAuditLog from './store/useAuditLog'
 
