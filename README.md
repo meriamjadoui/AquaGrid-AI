@@ -94,8 +94,6 @@ The estimated hardware cost for a functional prototype sits between 100 and 120 
 
 ---
 
-## Author
+## License
 
-**Meriam Jadoui** — Cloud Engineer and Full-Stack Developer  
-Contact: Meriam.Jadoui@esprit.tn  
-Location: Tunis, Tunisia
+This project is open-source. Contributions and feedback are welcome.
