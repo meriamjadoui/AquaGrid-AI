@@ -7,7 +7,7 @@ export default function KpiCard({ label, value, unit, icon: Icon, color = 'text-
       <div className="flex items-start justify-between">
         <span className="kpi-label">{label}</span>
         {Icon && (
-          <span className={clsx('p-2 rounded-lg bg-surface-border', color.replace('text-', 'text-'))}>
+          <span className={clsx('p-2 rounded-lg', color.replace('text-', 'bg-').replace('400', '400/10').replace('500', '500/10'))}>
             <Icon size={16} className={color} />
           </span>
         )}
@@ -16,7 +16,14 @@ export default function KpiCard({ label, value, unit, icon: Icon, color = 'text-
         <span className={clsx('kpi-value data-value', color)}>
           {value}
         </span>
-        {unit && <span className="text-sm text-slate-500 mb-1">{unit}</span>}
+        {unit && (
+          <span
+            className="text-sm mb-1"
+            style={{ color: 'var(--color-text-muted)' }}
+          >
+            {unit}
+          </span>
+        )}
       </div>
       {(badge || delta) && (
         <div className="flex items-center gap-2 flex-wrap">
