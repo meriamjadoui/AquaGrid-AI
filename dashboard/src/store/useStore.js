@@ -2,10 +2,10 @@ import { create } from 'zustand'
 import { generateSensorData, generateHistoryData, tickSensors, appendHistory } from '../utils/mockData'
 import useAuditLog from './useAuditLog'
 
-const TICK_MS   = 3000
+const TICK_MS    = 3000
 const MAX_ALERTS = 20
 
-// ─── Alert rules (same as before) ────────────────────────────────────────────────────
+// ── Alert rules ──────────────────────────────────────────────────────────────
 const ALERT_RULES = [
   {
     key: 'leak_detected',
@@ -143,8 +143,8 @@ const ALERT_RULES = [
 ]
 
 function generateAlerts(sensors, aiResults, existingAlerts) {
-  const now = new Date()
-  const nowMs = now.getTime()
+  const now    = new Date()
+  const nowMs  = now.getTime()
   const timeStr = now.toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' })
   const newAlerts = []
   const newAuditEvents = []
@@ -153,7 +153,6 @@ function generateAlerts(sensors, aiResults, existingAlerts) {
     if (!rule.check(sensors, aiResults)) continue
     const recent = existingAlerts.find(a => a.key === rule.key)
     if (recent && nowMs - recent.timestamp < 60_000) continue
-
     newAlerts.push({
       id: nowMs + Math.random(),
       key: rule.key,
@@ -163,34 +162,36 @@ function generateAlerts(sensors, aiResults, existingAlerts) {
       message: rule.message(sensors, aiResults),
       read: false,
     })
-
-    if (rule.audit) {
-      newAuditEvents.push(rule.audit(sensors, aiResults))
-    }
+    if (rule.audit) newAuditEvents.push(rule.audit(sensors, aiResults))
   }
 
   return { newAlerts, newAuditEvents }
 }
 
+// ── Apply / persist theme on <html> ─────────────────────────────────────────
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme)
+}
+
+const savedTheme = (() => {
+  try { return localStorage.getItem('aquagrid-theme') } catch { return null }
+})()
+const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+const initialTheme = savedTheme ?? (systemDark ? 'dark' : 'light')
+applyTheme(initialTheme)
+
 const useStore = create((set, get) => {
+  // Live sensor tick
   setInterval(() => {
     const { sensors, history, pumpOn, aiResults, alerts } = get()
     const next = tickSensors(sensors, pumpOn)
     const { newAlerts, newAuditEvents } = generateAlerts(next, aiResults, alerts)
     const merged = [...newAlerts, ...alerts].slice(0, MAX_ALERTS)
-
-    // Write audit events to the audit log store
     if (newAuditEvents.length > 0) {
       const record = useAuditLog.getState().record
       newAuditEvents.forEach(ev => record(ev))
     }
-
-    set({
-      sensors:     next,
-      history:     appendHistory(history, next),
-      alerts:      merged,
-      lastUpdated: new Date(),
-    })
+    set({ sensors: next, history: appendHistory(history, next), alerts: merged, lastUpdated: new Date() })
   }, TICK_MS)
 
   return {
@@ -199,6 +200,21 @@ const useStore = create((set, get) => {
     alerts:      [],
     sidebarOpen: true,
     lastUpdated: new Date(),
+
+    // ── Theme ──
+    theme: initialTheme,
+    toggleTheme: () => {
+      const next = get().theme === 'dark' ? 'light' : 'dark'
+      applyTheme(next)
+      try { localStorage.setItem('aquagrid-theme', next) } catch {}
+      useAuditLog.getState().record({
+        category: 'System',
+        severity: 'action',
+        title:    `Theme switched to ${next} mode`,
+        detail:   `User changed UI theme to ${next} mode.`,
+      })
+      set({ theme: next })
+    },
 
     aiResults: {
       leak:          { isLeak: false, rollingMean: 0, consecutiveHigh: 0 },
@@ -214,6 +230,7 @@ const useStore = create((set, get) => {
     markAlertRead:  (id) => set(s => ({ alerts: s.alerts.map(a => a.id === id ? { ...a, read: true } : a) })),
     clearAlerts:    () => set({ alerts: [] }),
     refreshSensors: () => set({ sensors: tickSensors(get().sensors, get().pumpOn), lastUpdated: new Date() }),
+
     pumpOn: false,
     togglePump: () => {
       const next = !get().pumpOn
