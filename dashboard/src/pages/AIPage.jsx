@@ -1,5 +1,5 @@
 import React from 'react'
-import { ShieldCheck, Wrench, Zap, Droplets, BrainCircuit, ArrowUpRight } from 'lucide-react'
+import { ShieldCheck, Wrench, Zap, Droplets, BrainCircuit, ArrowUpRight, Network } from 'lucide-react'
 import useStore from '../store/useStore'
 import GaugeRing from '../components/UI/GaugeRing'
 import AquaLineChart from '../components/Charts/LineChart'
@@ -87,6 +87,60 @@ export default function AIPage() {
         <div>
           <h2 className="text-2xl font-extrabold tracking-tight" style={{ color: 'var(--color-text)' }}>Smart Monitoring</h2>
           <p className="text-sm mt-0.5 font-medium" style={{ color: 'var(--color-text-muted)' }}>Your system is being monitored automatically — 24/7</p>
+        </div>
+      </div>
+
+      {/* TensorFlow.js Autoencoder Card */}
+      <div className="card mb-6 flex flex-col gap-5 border border-indigo-100 relative overflow-hidden">
+        {/* Top Header Row */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-md" style={{ background: 'linear-gradient(135deg, #4F7DF3, #6366F1)' }}>
+              <Network size={20} style={{ color: '#ffffff' }} strokeWidth={2} />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold tracking-tight" style={{ color: 'var(--color-text)' }}>Adaptive Anomaly Detector</h3>
+              <p className="text-xs font-medium" style={{ color: 'var(--color-text-muted)' }}>Powered by TensorFlow.js Deep Learning</p>
+            </div>
+          </div>
+          <span className="badge-info text-xs px-3 py-1 bg-indigo-50 text-indigo-700 border border-indigo-200">
+            {aiResults?.autoencoderStatus ?? 'Active'}
+          </span>
+        </div>
+        
+        {/* Content Row */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 items-center">
+          <div className="col-span-2 flex flex-col gap-4">
+            <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>
+              This model utilizes an in-browser Autoencoder neural network. It continuously learns your system's normal operational baseline from historical data. If a multi-sensor pattern deviates from the trained weights, it instantly flags a structural anomaly.
+            </p>
+            <div className="flex items-center gap-5 text-xs font-semibold" style={{ color: 'var(--color-text)' }}>
+              <span className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-sm"></span> Normal (0-20)
+              </span>
+              <span className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-sm"></span> Warning (20-50)
+              </span>
+              <span className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-red-500 shadow-sm"></span> Anomaly (50+)
+              </span>
+            </div>
+          </div>
+          <div className="flex justify-center border-l border-gray-100 pl-6">
+            <GaugeRing 
+              value={aiResults?.anomalyScore ?? 0} 
+              max={100} 
+              color={
+                (aiResults?.anomalyScore ?? 0) > 50 ? '#EF4444' : 
+                (aiResults?.anomalyScore ?? 0) > 20 ? '#F59E0B' : 
+                '#10B981'
+              } 
+              size={110} 
+              strokeWidth={8} 
+              label="Anomaly Score"
+              unit="" 
+            />
+          </div>
         </div>
       </div>
 

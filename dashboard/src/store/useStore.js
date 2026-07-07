@@ -253,6 +253,8 @@ const useStore = create((set, get) => {
       panel:         { needsCleaning: false, ratio: null },
       solarForecast: 0,
       panelSoiled:   false,
+      anomalyScore:  0,
+      autoencoderStatus: 'Initializing...',
     },
     setAiResults: (results) => set({ aiResults: results }),
 
