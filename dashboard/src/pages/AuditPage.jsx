@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react'
-import { ClipboardList, Filter, Download, Trash2, ChevronDown } from 'lucide-react'
+import { ClipboardList, Filter, Download, Trash2, ChevronDown, ArrowUpRight } from 'lucide-react'
 import useAuditLog, { SEVERITY, CATEGORY } from '../store/useAuditLog'
 import useStore from '../store/useStore'
 
@@ -30,12 +30,11 @@ function downloadCSV(events) {
   a.click()
 }
 
-// KPI card colour config — theme-aware via inline style
 const KPI_COLORS = [
-  { label: 'Total Events',    key: 'total',    light: '#1a202c', dark: '#e2e8f0'  },
-  { label: 'Critical Events', key: 'critical', light: '#dc2626', dark: '#f87171'  },
-  { label: 'Warnings',        key: 'warning',  light: '#d97706', dark: '#fbbf24'  },
-  { label: 'Actions Taken',   key: 'action',   light: '#7c3aed', dark: '#a78bfa'  },
+  { label: 'Total Events',    key: 'total',    color: '#4F7DF3' },
+  { label: 'Critical Events', key: 'critical', color: '#EF4444' },
+  { label: 'Warnings',        key: 'warning',  color: '#F59E0B' },
+  { label: 'Actions Taken',   key: 'action',   color: '#8B5CF6' },
 ]
 
 export default function AuditPage() {
@@ -70,25 +69,18 @@ export default function AuditPage() {
     action:   events.filter(e => e.severity === 'action').length,
   }), [events])
 
-  // Reusable theme-aware colour shortcuts
-  const text        = 'var(--color-text)'
-  const textMuted   = 'var(--color-text-muted)'
-  const textFaint   = 'var(--color-text-faint)'
-  const surfaceBg   = 'var(--color-surface-bg)'
-  const surfaceBorder = 'var(--color-surface-border)'
-  const surfaceHover  = 'var(--color-surface-hover)'
-  const surfaceOffset = 'var(--color-surface-offset)'
-
   return (
     <div className="space-y-6">
 
       {/* ── Header ── */}
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-3">
-          <ClipboardList size={22} className="text-primary-500" />
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'var(--color-primary-dim)' }}>
+            <ClipboardList size={20} style={{ color: 'var(--color-primary)' }} strokeWidth={1.8} />
+          </div>
           <div>
-            <h2 className="text-xl font-bold" style={{ color: text }}>Audit Log</h2>
-            <p className="text-sm mt-0.5" style={{ color: textMuted }}>
+            <h2 className="text-2xl font-extrabold tracking-tight" style={{ color: 'var(--color-text)' }}>Audit Log</h2>
+            <p className="text-sm mt-0.5 font-medium" style={{ color: 'var(--color-text-muted)' }}>
               Complete history of system events, alerts and actions
             </p>
           </div>
@@ -96,40 +88,39 @@ export default function AuditPage() {
         <div className="flex gap-2">
           <button
             onClick={() => downloadCSV(filtered)}
-            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold transition-all duration-200"
             style={{
-              background: 'rgba(1,105,111,0.12)',
-              color: isDark ? '#2fb4b8' : '#01696f',
-              border: '1px solid rgba(1,105,111,0.25)',
+              borderRadius: 'var(--radius-pill)',
+              background: 'var(--color-primary-dim)',
+              color: 'var(--color-primary)',
+              border: '1px solid transparent',
             }}
           >
-            <Download size={13} /> Export CSV
+            <Download size={13} strokeWidth={2} /> Export CSV
           </button>
           <button
             onClick={clearLog}
-            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold transition-all duration-200"
             style={{
+              borderRadius: 'var(--radius-pill)',
               background: 'rgba(239,68,68,0.08)',
-              color: isDark ? '#f87171' : '#dc2626',
-              border: '1px solid rgba(239,68,68,0.20)',
+              color: '#EF4444',
+              border: '1px solid rgba(239,68,68,0.15)',
             }}
           >
-            <Trash2 size={13} /> Clear
+            <Trash2 size={13} strokeWidth={2} /> Clear
           </button>
         </div>
       </div>
 
       {/* ── KPI cards ── */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {KPI_COLORS.map(k => (
-          <div key={k.label} className="card text-center py-4">
-            <p
-              className="text-2xl font-bold data-value"
-              style={{ color: isDark ? k.dark : k.light }}
-            >
+          <div key={k.label} className="card text-center py-5">
+            <p className="text-2xl font-extrabold data-value" style={{ color: k.color }}>
               {counts[k.key]}
             </p>
-            <p className="text-xs mt-1" style={{ color: textMuted }}>{k.label}</p>
+            <p className="text-xs mt-1.5 font-semibold" style={{ color: 'var(--color-text-muted)' }}>{k.label}</p>
           </div>
         ))}
       </div>
@@ -137,18 +128,21 @@ export default function AuditPage() {
       {/* ── Filters ── */}
       <div className="card">
         <div className="flex flex-wrap gap-3 items-center">
-          <Filter size={14} style={{ color: textFaint }} className="shrink-0" />
+          <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'var(--color-surface-hover)' }}>
+            <Filter size={14} style={{ color: 'var(--color-text-faint)' }} />
+          </div>
 
           <input
             type="text"
             placeholder="Search events..."
             value={search}
             onChange={e => setFilter(setSearch, e.target.value)}
-            className="flex-1 min-w-[160px] rounded-lg px-3 py-1.5 text-sm focus:outline-none transition-colors"
+            className="flex-1 min-w-[160px] px-4 py-2 text-sm focus:outline-none transition-all duration-200 font-medium"
             style={{
-              background: surfaceBg,
-              border: `1px solid ${surfaceBorder}`,
-              color: text,
+              background: 'var(--color-surface-bg)',
+              border: '1px solid var(--color-surface-border)',
+              borderRadius: 'var(--radius-pill)',
+              color: 'var(--color-text)',
             }}
           />
 
@@ -157,13 +151,18 @@ export default function AuditPage() {
             <select
               value={filterCategory}
               onChange={e => setFilter(setFilterCategory, e.target.value)}
-              className="appearance-none rounded-lg pl-3 pr-8 py-1.5 text-sm focus:outline-none cursor-pointer"
-              style={{ background: surfaceBg, border: `1px solid ${surfaceBorder}`, color: text }}
+              className="appearance-none pl-4 pr-8 py-2 text-sm focus:outline-none cursor-pointer font-medium"
+              style={{
+                background: 'var(--color-surface-bg)',
+                border: '1px solid var(--color-surface-border)',
+                borderRadius: 'var(--radius-pill)',
+                color: 'var(--color-text)',
+              }}
             >
               <option value={ALL}>All Categories</option>
               {Object.values(CATEGORY).map(c => <option key={c} value={c}>{c}</option>)}
             </select>
-            <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: textFaint }} />
+            <ChevronDown size={12} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: 'var(--color-text-faint)' }} />
           </div>
 
           {/* Severity */}
@@ -171,16 +170,21 @@ export default function AuditPage() {
             <select
               value={filterSeverity}
               onChange={e => setFilter(setFilterSeverity, e.target.value)}
-              className="appearance-none rounded-lg pl-3 pr-8 py-1.5 text-sm focus:outline-none cursor-pointer"
-              style={{ background: surfaceBg, border: `1px solid ${surfaceBorder}`, color: text }}
+              className="appearance-none pl-4 pr-8 py-2 text-sm focus:outline-none cursor-pointer font-medium"
+              style={{
+                background: 'var(--color-surface-bg)',
+                border: '1px solid var(--color-surface-border)',
+                borderRadius: 'var(--radius-pill)',
+                color: 'var(--color-text)',
+              }}
             >
               <option value={ALL}>All Severities</option>
               {Object.entries(SEVERITY).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
             </select>
-            <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: textFaint }} />
+            <ChevronDown size={12} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: 'var(--color-text-faint)' }} />
           </div>
 
-          <span className="ml-auto text-xs" style={{ color: textFaint }}>
+          <span className="ml-auto text-xs font-semibold" style={{ color: 'var(--color-text-faint)' }}>
             {filtered.length} event{filtered.length !== 1 ? 's' : ''}
           </span>
         </div>
@@ -189,34 +193,33 @@ export default function AuditPage() {
       {/* ── Event list ── */}
       <div className="card p-0 overflow-hidden">
         {paginated.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16" style={{ color: textMuted }}>
+          <div className="flex flex-col items-center justify-center py-16" style={{ color: 'var(--color-text-muted)' }}>
             <ClipboardList size={32} className="mb-3 opacity-30" />
-            <p className="text-sm">No events match your filters</p>
-            <p className="text-xs mt-1" style={{ color: textFaint }}>Events are recorded automatically as the system runs</p>
+            <p className="text-sm font-medium">No events match your filters</p>
+            <p className="text-xs mt-1" style={{ color: 'var(--color-text-faint)' }}>Events are recorded automatically as the system runs</p>
           </div>
         ) : (
           <div>
             {paginated.map((e, idx) => {
               const sev   = SEVERITY[e.severity] ?? SEVERITY.info
-              const rowBg = isDark ? sev.rowDark : sev.rowLight
               const isLast = idx === paginated.length - 1
 
               return (
                 <div
                   key={e.id}
-                  className="flex gap-4 px-5 py-3 transition-colors"
+                  className="flex gap-4 px-5 py-3.5 transition-all duration-200 group"
                   style={{
-                    background: rowBg,
-                    borderBottom: isLast ? 'none' : `1px solid ${surfaceBorder}`,
+                    borderBottom: isLast ? 'none' : '1px solid var(--color-surface-border)',
                   }}
-                  onMouseEnter={ev => ev.currentTarget.style.background = surfaceHover}
-                  onMouseLeave={ev => ev.currentTarget.style.background = rowBg}
+                  onMouseEnter={ev => ev.currentTarget.style.background = 'var(--color-surface-hover)'}
+                  onMouseLeave={ev => ev.currentTarget.style.background = 'transparent'}
                 >
                   {/* Severity pill */}
                   <div className="shrink-0 pt-0.5">
                     <span
-                      className="inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                      className="inline-block text-[10px] font-bold px-3 py-1"
                       style={{
+                        borderRadius: 'var(--radius-pill)',
                         background:  sev.pillBg,
                         color:       sev.pillColor,
                         border:      `1px solid ${sev.pillBorder}`,
@@ -229,24 +232,29 @@ export default function AuditPage() {
                   {/* Content */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-sm font-semibold" style={{ color: text }}>{e.title}</span>
+                      <span className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>{e.title}</span>
                       <span
-                        className="text-xs px-2 py-0.5 rounded-full"
-                        style={{ background: surfaceOffset, color: textMuted }}
+                        className="text-xs px-2.5 py-0.5 font-semibold"
+                        style={{
+                          borderRadius: 'var(--radius-pill)',
+                          background: 'var(--color-surface-hover)',
+                          color: 'var(--color-text-muted)',
+                        }}
                       >
                         {e.category}
                       </span>
                     </div>
                     {e.detail && (
-                      <p className="text-xs mt-0.5 truncate" style={{ color: textMuted }}>{e.detail}</p>
+                      <p className="text-xs mt-0.5 truncate font-medium" style={{ color: 'var(--color-text-muted)' }}>{e.detail}</p>
                     )}
                   </div>
 
-                  {/* Timestamp */}
-                  <div className="shrink-0 text-right">
-                    <p className="text-xs tabular-nums whitespace-nowrap" style={{ color: textFaint }}>
+                  {/* Timestamp + arrow */}
+                  <div className="shrink-0 text-right flex items-center gap-2">
+                    <p className="text-xs tabular-nums whitespace-nowrap font-medium" style={{ color: 'var(--color-text-faint)' }}>
                       {fmt(e.timestamp)}
                     </p>
+                    <ArrowUpRight size={14} className="opacity-0 group-hover:opacity-60 transition-opacity" style={{ color: 'var(--color-text-faint)' }} />
                   </div>
                 </div>
               )
@@ -257,21 +265,29 @@ export default function AuditPage() {
 
       {/* ── Pagination ── */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2">
+        <div className="flex items-center justify-center gap-3">
           <button
             disabled={page === 1}
             onClick={() => setPage(p => p - 1)}
-            className="px-3 py-1.5 rounded-lg text-xs transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-            style={{ color: textMuted, border: `1px solid ${surfaceBorder}` }}
+            className="px-4 py-2 text-xs font-semibold transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed"
+            style={{
+              borderRadius: 'var(--radius-pill)',
+              color: 'var(--color-text-muted)',
+              border: '1px solid var(--color-surface-border)',
+            }}
           >
             Previous
           </button>
-          <span className="text-xs" style={{ color: textFaint }}>{page} / {totalPages}</span>
+          <span className="text-xs font-semibold" style={{ color: 'var(--color-text-faint)' }}>{page} / {totalPages}</span>
           <button
             disabled={page === totalPages}
             onClick={() => setPage(p => p + 1)}
-            className="px-3 py-1.5 rounded-lg text-xs transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-            style={{ color: textMuted, border: `1px solid ${surfaceBorder}` }}
+            className="px-4 py-2 text-xs font-semibold transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed"
+            style={{
+              borderRadius: 'var(--radius-pill)',
+              color: 'var(--color-text-muted)',
+              border: '1px solid var(--color-surface-border)',
+            }}
           >
             Next
           </button>

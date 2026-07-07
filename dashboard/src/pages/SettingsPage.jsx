@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Wifi, Bell, Database, Shield } from 'lucide-react'
+import { Wifi, Bell, Database, Shield, ChevronRight } from 'lucide-react'
 import useStore from '../store/useStore'
 
 export default function SettingsPage() {
@@ -9,39 +9,42 @@ export default function SettingsPage() {
   const [firebaseUrl, setFirebaseUrl] = useState('https://aquagrid-ai-default-rtdb.firebaseio.com')
 
   const sectionTitle = (Icon, label) => (
-    <div className="flex items-center gap-2 mb-1">
-      <Icon size={16} className="text-primary-500" />
-      <h3 className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>{label}</h3>
+    <div className="flex items-center gap-2.5 mb-2">
+      <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'var(--color-primary-dim)' }}>
+        <Icon size={16} style={{ color: 'var(--color-primary)' }} strokeWidth={1.8} />
+      </div>
+      <h3 className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>{label}</h3>
     </div>
   )
 
   return (
     <div className="space-y-6 max-w-2xl">
       <div>
-        <h2 className="text-xl font-bold" style={{ color: 'var(--color-text)' }}>Settings</h2>
-        <p className="text-sm mt-0.5" style={{ color: 'var(--color-text-muted)' }}>System configuration and connectivity</p>
+        <h2 className="text-2xl font-extrabold tracking-tight" style={{ color: 'var(--color-text)' }}>Settings</h2>
+        <p className="text-sm mt-1 font-medium" style={{ color: 'var(--color-text-muted)' }}>System configuration and connectivity</p>
       </div>
 
       {/* Connectivity */}
-      <div className="card space-y-4">
+      <div className="card space-y-5">
         {sectionTitle(Wifi, 'Connectivity')}
         <div>
-          <label className="block text-xs mb-1.5" style={{ color: 'var(--color-text-muted)' }}>Firebase Realtime DB URL</label>
+          <label className="block text-xs mb-2 font-semibold" style={{ color: 'var(--color-text-muted)' }}>Firebase Realtime DB URL</label>
           <input
             value={firebaseUrl}
             onChange={e => setFirebaseUrl(e.target.value)}
-            className="w-full rounded-lg px-3 py-2 text-sm focus:outline-none transition-colors"
+            className="w-full px-4 py-2.5 text-sm focus:outline-none transition-all duration-200 font-medium"
             style={{
               background: 'var(--color-surface-bg)',
               border: '1px solid var(--color-surface-border)',
+              borderRadius: 'var(--radius-md)',
               color: 'var(--color-text)',
             }}
           />
         </div>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between p-3" style={{ background: 'var(--color-surface-hover)', borderRadius: 'var(--radius-md)' }}>
           <div>
-            <p className="text-sm" style={{ color: 'var(--color-text)' }}>ESP32 WiFi Signal</p>
-            <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-muted)' }}>
+            <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>ESP32 WiFi Signal</p>
+            <p className="text-xs mt-0.5 font-medium" style={{ color: 'var(--color-text-muted)' }}>
               {sensors.wifiRssi} dBm — {sensors.wifiRssi > -65 ? 'Strong' : 'Weak'} signal
             </p>
           </div>
@@ -49,33 +52,34 @@ export default function SettingsPage() {
             {sensors.wifiRssi > -65 ? 'Strong' : 'Weak'}
           </span>
         </div>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between p-3" style={{ background: 'var(--color-surface-hover)', borderRadius: 'var(--radius-md)' }}>
           <div>
-            <p className="text-sm" style={{ color: 'var(--color-text)' }}>Device Uptime</p>
-            <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-muted)' }}>{sensors.uptime} hours since last restart</p>
+            <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>Device Uptime</p>
+            <p className="text-xs mt-0.5 font-medium" style={{ color: 'var(--color-text-muted)' }}>{sensors.uptime} hours since last restart</p>
           </div>
           <span className="badge-ok">Online</span>
         </div>
       </div>
 
       {/* Data refresh */}
-      <div className="card space-y-4">
+      <div className="card space-y-5">
         {sectionTitle(Database, 'Data Settings')}
         <div>
-          <label className="block text-xs mb-1.5" style={{ color: 'var(--color-text-muted)' }}>
-            Auto-refresh interval: <span className="text-primary-500 font-medium">{refreshRate}s</span>
+          <label className="block text-xs mb-2 font-semibold" style={{ color: 'var(--color-text-muted)' }}>
+            Auto-refresh interval: <span style={{ color: 'var(--color-primary)' }}>{refreshRate}s</span>
           </label>
           <input
             type="range" min="5" max="60" step="5"
             value={refreshRate}
             onChange={e => setRefreshRate(+e.target.value)}
-            className="w-full accent-primary-500"
+            className="w-full"
+            style={{ accentColor: 'var(--color-primary)' }}
           />
         </div>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between p-3" style={{ background: 'var(--color-surface-hover)', borderRadius: 'var(--radius-md)' }}>
           <div>
-            <p className="text-sm" style={{ color: 'var(--color-text)' }}>Data Protocol</p>
-            <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>MQTT over WiFi → Firebase</p>
+            <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>Data Protocol</p>
+            <p className="text-xs font-medium" style={{ color: 'var(--color-text-muted)' }}>MQTT over WiFi → Firebase</p>
           </div>
           <span className="badge-ok">Active</span>
         </div>
@@ -90,18 +94,30 @@ export default function SettingsPage() {
           { label: 'Battery low warnings',              key: 'battery' },
           { label: 'Pump fault notifications',          key: 'pump' },
         ].map(item => (
-          <div key={item.key} className="flex items-center justify-between">
-            <p className="text-sm" style={{ color: 'var(--color-text)' }}>{item.label}</p>
+          <div
+            key={item.key}
+            className="flex items-center justify-between p-3 transition-all duration-200"
+            style={{ background: 'var(--color-surface-hover)', borderRadius: 'var(--radius-md)' }}
+          >
+            <p className="text-sm font-medium" style={{ color: 'var(--color-text)' }}>{item.label}</p>
             <button
               onClick={() => setNotifications(n => !n)}
-              className={`relative w-10 h-5 rounded-full transition-colors ${
-                notifications ? 'bg-primary-500' : 'bg-surface-border'
-              }`}
+              className="relative w-11 h-6 transition-colors duration-200"
+              style={{
+                borderRadius: 'var(--radius-pill)',
+                background: notifications
+                  ? 'var(--color-primary)'
+                  : 'var(--color-surface-border)',
+              }}
               aria-label={`Toggle ${item.label}`}
             >
-              <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${
-                notifications ? 'translate-x-5' : 'translate-x-0'
-              }`} />
+              <span
+                className="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform duration-200"
+                style={{
+                  transform: notifications ? 'translateX(20px)' : 'translateX(0)',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                }}
+              />
             </button>
           </div>
         ))}
@@ -110,7 +126,7 @@ export default function SettingsPage() {
       {/* Hardware info */}
       <div className="card">
         {sectionTitle(Shield, 'Hardware Info')}
-        <div className="grid grid-cols-2 gap-2 text-xs mt-3">
+        <div className="grid grid-cols-1 gap-2 mt-4">
           {[
             { k: 'Controller',   v: 'ESP32 (Dual-core 240MHz)' },
             { k: 'Flow Sensor',  v: 'YF-S201' },
@@ -121,11 +137,19 @@ export default function SettingsPage() {
           ].map(({ k, v }) => (
             <div
               key={k}
-              className="flex justify-between gap-2 py-1.5"
-              style={{ borderBottom: '1px solid var(--color-surface-border)' }}
+              className="flex items-center justify-between gap-2 px-3 py-2.5 text-xs group transition-all duration-200"
+              style={{
+                borderRadius: 'var(--radius-sm)',
+                background: 'transparent',
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = 'var(--color-surface-hover)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
             >
-              <span style={{ color: 'var(--color-text-muted)' }}>{k}</span>
-              <span className="font-mono" style={{ color: 'var(--color-text)' }}>{v}</span>
+              <span className="font-semibold" style={{ color: 'var(--color-text-muted)' }}>{k}</span>
+              <div className="flex items-center gap-1.5">
+                <span className="font-mono font-semibold" style={{ color: 'var(--color-text)' }}>{v}</span>
+                <ChevronRight size={12} className="opacity-0 group-hover:opacity-50 transition-opacity" style={{ color: 'var(--color-text-faint)' }} />
+              </div>
             </div>
           ))}
         </div>

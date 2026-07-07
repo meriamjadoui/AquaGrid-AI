@@ -176,8 +176,7 @@ function applyTheme(theme) {
 const savedTheme = (() => {
   try { return localStorage.getItem('aquagrid-theme') } catch { return null }
 })()
-const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-const initialTheme = savedTheme ?? (systemDark ? 'dark' : 'light')
+const initialTheme = savedTheme ?? 'light'
 applyTheme(initialTheme)
 
 // ── Impact counters — accumulate over session ─────────────────────────────────

@@ -2,7 +2,7 @@ import React from 'react'
 import { NavLink } from 'react-router-dom'
 import {
   LayoutDashboard, Droplets, Zap, BrainCircuit,
-  BellRing, Settings, ChevronLeft, ChevronRight, Wifi, ClipboardList
+  BellRing, Settings, ChevronLeft, ChevronRight, ClipboardList
 } from 'lucide-react'
 import useStore from '../../store/useStore'
 import clsx from 'clsx'
@@ -23,36 +23,49 @@ export default function Sidebar() {
   return (
     <aside
       className={clsx(
-        'flex flex-col border-r transition-all duration-300 z-20 shrink-0',
-        sidebarOpen ? 'w-56' : 'w-16'
+        'flex flex-col shrink-0 transition-all duration-300 z-20 relative',
+        sidebarOpen ? 'w-60' : 'w-[72px]'
       )}
-      style={{ background: 'var(--color-surface-card)', borderColor: 'var(--color-surface-border)' }}
+      style={{
+        background: 'var(--color-surface-card)',
+        borderRight: '1px solid var(--color-surface-border)',
+      }}
     >
-      {/* Logo */}
-      <div className="flex items-center gap-3 px-4 py-4 border-b" style={{ borderColor: 'var(--color-surface-border)' }}>
+      {/* Logo area */}
+      <div
+        className="flex items-center gap-3 px-4 h-16 shrink-0"
+        style={{ borderBottom: '1px solid var(--color-surface-border)' }}
+      >
         <div className="shrink-0">
-          <svg viewBox="0 0 36 36" fill="none" className="w-8 h-8" aria-label="AquaWise logo">
-            <rect width="36" height="36" rx="10" fill="#0d8fae"/>
-            <path d="M18 6 C13 12 7 15 7 21 C7 25.9 12 31 18 31 C24 31 29 25.9 29 21 C29 15 23 12 18 6Z"
-              fill="#26BDE2" opacity="0.95"/>
-            <path d="M14 22 Q18 18 22 22" stroke="white" strokeWidth="1.8" fill="none" strokeLinecap="round"/>
-            <circle cx="27" cy="10" r="3.5" fill="#FCC30B"/>
-            <path d="M27 5.5L27 6.5 M27 13.5L27 14.5 M22.5 7.5L23.3 8.3 M30.7 11.7L31.5 12.5 M21 10L22 10 M32 10L33 10"
-              stroke="#FCC30B" strokeWidth="1.1" strokeLinecap="round"/>
+          <svg viewBox="0 0 36 36" fill="none" className="w-9 h-9" aria-label="AquaWise logo">
+            <defs>
+              <linearGradient id="logo-grad" x1="0" y1="0" x2="36" y2="36">
+                <stop offset="0%" stopColor="#4F7DF3" />
+                <stop offset="100%" stopColor="#56A7F5" />
+              </linearGradient>
+            </defs>
+            <rect width="36" height="36" rx="10" fill="url(#logo-grad)"/>
+            <path d="M18 8 C14 13 9 16 9 21 C9 25 13 29 18 29 C23 29 27 25 27 21 C27 16 22 13 18 8Z"
+              fill="rgba(255,255,255,0.9)"/>
+            <path d="M14 22 Q18 18 22 22" stroke="rgba(79,125,243,0.6)" strokeWidth="1.8" fill="none" strokeLinecap="round"/>
           </svg>
         </div>
         {sidebarOpen && (
           <div className="min-w-0">
             <p className="text-sm font-bold leading-tight" style={{ color: 'var(--color-text)' }}>AquaWise</p>
-            <p className="text-xs flex items-center gap-1" style={{ color: 'var(--color-primary)' }}>
-              <Wifi size={10} /> Live
+            <p className="text-[10px] font-semibold flex items-center gap-1" style={{ color: 'var(--color-primary)' }}>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              Live
             </p>
           </div>
         )}
         <button
           onClick={toggleSidebar}
-          className="ml-auto p-1 rounded-lg hover:bg-theme-hover transition-colors"
-          style={{ color: 'var(--color-text-muted)' }}
+          className="ml-auto p-1.5 rounded-lg transition-all duration-200 hover:scale-105"
+          style={{
+            color: 'var(--color-text-faint)',
+            background: 'var(--color-surface-hover)',
+          }}
           aria-label={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
         >
           {sidebarOpen ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
@@ -60,7 +73,12 @@ export default function Sidebar() {
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 px-2 py-3 flex flex-col gap-1">
+      <nav className="flex-1 px-3 py-4 flex flex-col gap-1 overflow-y-auto custom-scroll">
+        {sidebarOpen && (
+          <p className="text-[10px] font-semibold uppercase tracking-widest px-3 mb-2" style={{ color: 'var(--color-text-faint)' }}>
+            Menu
+          </p>
+        )}
         {NAV.map(({ to, icon: Icon, label }) => (
           <NavLink
             key={to}
@@ -69,9 +87,10 @@ export default function Sidebar() {
             title={!sidebarOpen ? label : undefined}
           >
             <div className="relative shrink-0">
-              <Icon size={18} />
+              <Icon size={18} strokeWidth={1.8} />
               {label === 'Alerts' && unread > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[9px] flex items-center justify-center text-white font-bold">
+                <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full text-[9px] flex items-center justify-center text-white font-bold"
+                  style={{ background: 'linear-gradient(135deg, #EF4444, #F87171)' }}>
                   {unread}
                 </span>
               )}
@@ -82,13 +101,13 @@ export default function Sidebar() {
       </nav>
 
       {/* Bottom */}
-      <div className="px-2 py-3 border-t" style={{ borderColor: 'var(--color-surface-border)' }}>
+      <div className="px-3 py-3" style={{ borderTop: '1px solid var(--color-surface-border)' }}>
         <NavLink
           to="/settings"
           className={({ isActive }) => clsx('sidebar-item', isActive && 'active')}
           title={!sidebarOpen ? 'Settings' : undefined}
         >
-          <Settings size={18} className="shrink-0" />
+          <Settings size={18} strokeWidth={1.8} className="shrink-0" />
           {sidebarOpen && <span>Settings</span>}
         </NavLink>
       </div>
