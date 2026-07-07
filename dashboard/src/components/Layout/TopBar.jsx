@@ -6,11 +6,11 @@ import { formatDistanceToNow } from 'date-fns'
 
 const PAGE_TITLES = {
   '/overview': 'Overview',
-  '/water':    'Water Monitoring',
-  '/energy':   'Energy Management',
-  '/ai':       'AI Insights',
-  '/alerts':   'Alerts',
-  '/audit':    'Audit Log',
+  '/water': 'Water Monitoring',
+  '/energy': 'Energy Management',
+  '/ai': 'AI Insights',
+  '/alerts': 'Alerts',
+  '/audit': 'Audit Log',
   '/settings': 'Settings',
 }
 
@@ -39,7 +39,7 @@ export default function TopBar() {
       <div className="flex items-center gap-3 min-w-0">
         <div>
           <h1 className="text-base font-bold tracking-tight" style={{ color: 'var(--color-text)' }}>
-            {greeting}, Meriam 👋
+            {greeting}, 👋
           </h1>
           <p className="text-xs font-medium" style={{ color: 'var(--color-text-faint)' }}>
             {PAGE_TITLES[pathname] ?? 'Dashboard'} · Updated {formatDistanceToNow(lastUpdated, { addSuffix: true })}
@@ -76,7 +76,7 @@ export default function TopBar() {
           aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
         >
           {isDark
-            ? <Sun  size={16} style={{ color: '#FBBF24' }} strokeWidth={1.8} />
+            ? <Sun size={16} style={{ color: '#FBBF24' }} strokeWidth={1.8} />
             : <Moon size={16} style={{ color: 'var(--color-primary)' }} strokeWidth={1.8} />
           }
         </button>
@@ -93,9 +93,9 @@ export default function TopBar() {
               boxShadow: '0 2px 8px rgba(79,125,243,0.3)',
             }}
           >
-            MJ
+            AD
           </div>
-          <span className="text-xs font-semibold hidden md:block" style={{ color: 'var(--color-text)' }}>Meriam J.</span>
+          <span className="text-xs font-semibold hidden md:block" style={{ color: 'var(--color-text)' }}>Admin</span>
         </div>
       </div>
     </header>
