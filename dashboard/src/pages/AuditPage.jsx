@@ -26,7 +26,7 @@ function downloadCSV(events) {
   const blob = new Blob([header + rows], { type: 'text/csv' })
   const a    = document.createElement('a')
   a.href     = URL.createObjectURL(blob)
-  a.download = `aquagrid-audit-${new Date().toISOString().slice(0,10)}.csv`
+  a.download = `aquawise-audit-${new Date().toISOString().slice(0,10)}.csv`
   a.click()
 }
 

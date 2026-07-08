@@ -23,7 +23,7 @@ async function runSimulator() {
       port: process.env.DB_PORT || 4306,
       user: process.env.DB_USER || 'root',
       password: process.env.DB_PASSWORD || '',
-      database: process.env.DB_NAME || 'aquagrid'
+      database: process.env.DB_NAME || 'aquawise'
     });
 
     console.log("✅ Connected to MySQL database!");

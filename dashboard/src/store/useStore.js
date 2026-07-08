@@ -174,7 +174,7 @@ function applyTheme(theme) {
 }
 
 const savedTheme = (() => {
-  try { return localStorage.getItem('aquagrid-theme') } catch { return null }
+  try { return localStorage.getItem('aquawise-theme') } catch { return null }
 })()
 const initialTheme = savedTheme ?? 'light'
 applyTheme(initialTheme)
@@ -265,7 +265,7 @@ const useStore = create((set, get) => {
     toggleTheme: () => {
       const next = get().theme === 'dark' ? 'light' : 'dark'
       applyTheme(next)
-      try { localStorage.setItem('aquagrid-theme', next) } catch {}
+      try { localStorage.setItem('aquawise-theme', next) } catch {}
       useAuditLog.getState().record({
         category: 'System',
         severity: 'action',

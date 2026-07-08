@@ -1,6 +1,6 @@
-# AquaGrid-AI — Machine Learning Pipeline
+# AquaWise — Machine Learning Pipeline
 
-This folder contains the complete, end-to-end Python Machine Learning pipeline for the AquaGrid-AI project. It complements the fast, in-browser AI engines by providing a robust, highly-accurate **Random Forest Classifier** designed specifically for real-time pipe leak detection.
+This folder contains the complete, end-to-end Python Machine Learning pipeline for the AquaWise project. It complements the fast, in-browser AI engines by providing a robust, highly-accurate **Random Forest Classifier** designed specifically for real-time pipe leak detection.
 
 ## Why this exists
 

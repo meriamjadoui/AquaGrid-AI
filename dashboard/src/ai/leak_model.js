@@ -1,6 +1,6 @@
 /**
  * @file leak_model.js
- * @description In-browser Random Forest leak detector for the AquaGrid-AI dashboard.
+ * @description In-browser Random Forest leak detector for the AquaWise dashboard.
  *
  * ## What it does
  * Classifies each 3-second sensor tick as "leak" or "no leak" by examining

@@ -6,7 +6,7 @@ export default function SettingsPage() {
   const { sensors } = useStore()
   const [refreshRate, setRefreshRate] = useState(10)
   const [notifications, setNotifications] = useState(true)
-  const [firebaseUrl, setFirebaseUrl] = useState('https://aquagrid-ai-default-rtdb.firebaseio.com')
+  const [firebaseUrl, setFirebaseUrl] = useState('https://aquawise-default-rtdb.firebaseio.com')
 
   const sectionTitle = (Icon, label) => (
     <div className="flex items-center gap-2.5 mb-2">
@@ -133,7 +133,7 @@ export default function SettingsPage() {
             { k: 'Level Sensor', v: 'HC-SR04 (waterproof)' },
             { k: 'Power Monitor',v: 'INA219' },
             { k: 'Temp Sensor',  v: 'DS18B20' },
-            { k: 'Firmware',     v: 'AquaGrid v0.1.0' },
+            { k: 'Firmware',     v: 'AquaWise v0.1.0' },
           ].map(({ k, v }) => (
             <div
               key={k}

@@ -12,9 +12,9 @@ async function initializeDatabase() {
       password: process.env.DB_PASSWORD || ''
     });
 
-    console.log("✅ Connected! Creating database 'aquagrid'...");
-    await connection.query("CREATE DATABASE IF NOT EXISTS aquagrid;");
-    await connection.query("USE aquagrid;");
+    console.log("✅ Connected! Creating database 'aquawise'...");
+    await connection.query("CREATE DATABASE IF NOT EXISTS aquawise;");
+    await connection.query("USE aquawise;");
 
     console.log("✅ Creating 'system_overview' table...");
     await connection.query(`

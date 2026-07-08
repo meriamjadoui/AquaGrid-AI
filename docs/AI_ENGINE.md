@@ -1,6 +1,6 @@
-# AquaGrid-AI — Hybrid AI Engine Deep Dive
+# AquaWise — Hybrid AI Engine Deep Dive
 
-This document explains every model in the AquaGrid-AI inference stack: what
+This document explains every model in the AquaWise inference stack: what
 problem it solves, how it was designed, how it works mathematically, and how
 the different technologies integrate into a single unified dashboard.
 
@@ -23,7 +23,7 @@ the different technologies integrate into a single unified dashboard.
 
 ## 1. Architecture Overview
 
-AquaGrid-AI employs a highly sophisticated **Hybrid AI Architecture** that runs inference across three completely different environments simultaneously, combining their results in real-time.
+AquaWise employs a highly sophisticated **Hybrid AI Architecture** that runs inference across three completely different environments simultaneously, combining their results in real-time.
 
 ```
 ┌─────────────────────────────────────────────────────┐

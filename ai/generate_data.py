@@ -1,7 +1,7 @@
 """
 generate_data.py
 -----------------
-Generates synthetic training data for the AquaGrid-AI leak detection model.
+Generates synthetic training data for the AquaWise leak detection model.
 
 Why synthetic data?
 We don't have real historical sensor logs yet (Firebase logging is not

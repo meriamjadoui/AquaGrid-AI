@@ -1,4 +1,4 @@
-# Contributing to AquaGrid-AI
+# Contributing to AquaWise
 
 Thank you for your interest in contributing! This document explains how to
 set up the project locally, the coding conventions we follow, and the pull
@@ -20,8 +20,8 @@ request process.
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/meriamjadoui/AquaGrid-AI.git
-cd AquaGrid-AI
+git clone https://github.com/meriamjadoui/AquaWise.git
+cd AquaWise
 
 # 2. Install dashboard dependencies
 cd dashboard
@@ -40,7 +40,7 @@ entirely in the browser.
 ## Project Structure
 
 ```
-AquaGrid-AI/
+AquaWise/
 ├── README.md            Project overview and quick-start
 ├── CONTRIBUTING.md      This file
 ├── docs/

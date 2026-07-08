@@ -1,8 +1,8 @@
 {
-  "name": "aquagrid-ai-runner",
+  "name": "aquawise-runner",
   "version": "1.0.0",
   "private": true,
-  "description": "One-command launcher for all AquaGrid-AI services (backend, ML service, simulator, dashboard)",
+  "description": "One-command launcher for all AquaWise services (backend, ML service, simulator, dashboard)",
   "scripts": {
     "start:all": "concurrently -n \"SIMULATOR,BACKEND,ML,DASHBOARD\" -c \"yellow,green,magenta,cyan\" \"npm run sim\" \"npm run backend\" \"npm run ml\" \"npm run dashboard\"",
     "sim": "node backend/esp32_simulator.js",

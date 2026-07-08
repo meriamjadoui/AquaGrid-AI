@@ -1,4 +1,4 @@
-// AquaGrid AI — Audit Log Store
+// AquaWise — Audit Log Store
 import { create } from 'zustand'
 
 export const SEVERITY = {

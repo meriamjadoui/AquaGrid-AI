@@ -4,7 +4,7 @@ Start-Sleep -Seconds 3
 
 Write-Host "Creating password reset file..."
 $resetFile = "C:\mysql-reset.txt"
-"ALTER USER 'root'@'localhost' IDENTIFIED BY 'aquagrid123';" | Out-File -FilePath $resetFile -Encoding ASCII
+"ALTER USER 'root'@'localhost' IDENTIFIED BY 'aquawise123';" | Out-File -FilePath $resetFile -Encoding ASCII
 
 Write-Host "Starting MySQL in safe mode to reset password..."
 $mysqld = "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysqld.exe"
@@ -24,4 +24,4 @@ Start-Service -Name MySQL80
 Write-Host "Cleaning up..."
 Remove-Item $resetFile
 
-Write-Host "Done! The MySQL root password is now: aquagrid123"
+Write-Host "Done! The MySQL root password is now: aquawise123"

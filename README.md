@@ -1,4 +1,4 @@
-# AquaWise (AquaGrid AI)
+# AquaWise (AquaWise)
 
 **Smart Solar-Powered Water Management System — Hybrid AI · IoT · Real-Time Dashboard**
 
@@ -96,7 +96,7 @@ The system is custom-designed for the following physical IoT components:
 
 ## 4 * Hybrid AI Engine & Chatbot
 
-AquaGrid-AI utilizes a unique **Hybrid Architecture** spanning the browser, local servers, and cloud LLMs. For an exhaustive technical breakdown of every model, see [docs/AI_ENGINE.md](docs/AI_ENGINE.md).
+AquaWise utilizes a unique **Hybrid Architecture** spanning the browser, local servers, and cloud LLMs. For an exhaustive technical breakdown of every model, see [docs/AI_ENGINE.md](docs/AI_ENGINE.md).
 
 ### 1. Python ML Microservice (Leak Detection)
 We utilize a highly accurate Random Forest model trained on thousands of rows of synthetic water flow data (`ai/model/leak_model.pkl`). The model runs in a Flask Python backend and receives real-time telemetry from the Node proxy to predict unseen pipeline leaks.
@@ -119,7 +119,7 @@ The dashboard features an integrated Chatbot powered by Google Gemini. The assis
 - MySQL Server 
 
 ### 1. Database Setup
-Create a MySQL database named `aquagrid` and initialize the tables:
+Create a MySQL database named `aquawise` and initialize the tables:
 ```bash
 cd backend
 npm install
