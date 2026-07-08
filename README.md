@@ -17,7 +17,6 @@ By combining **Live AI Models**, **Google Gemini Conversational Assistant**, and
 - 🔧 Prevent pump failures through predictive maintenance
 - 🌍 Enhance access to clean water for off-grid communities
 
----
 
 ## Table of Contents
 
@@ -28,7 +27,6 @@ By combining **Live AI Models**, **Google Gemini Conversational Assistant**, and
 5. [Getting Started (Local Setup)](#getting-started-local-setup)
 6. [Hardware-in-the-Loop Simulator](#hardware-in-the-loop-simulator)
 
----
 
 ## System Architecture
 
@@ -63,7 +61,6 @@ The platform is structured in a robust, decoupled, 3-tier architecture:
 - **Smart Fallback:** If the database or backend goes offline during a presentation, the dashboard seamlessly falls back to a local mockup simulation, ensuring the UI always remains interactive.
 - **Hardware-in-the-Loop Simulation:** A dedicated `esp32_simulator.js` script allows developers and juries to test the full data pipeline (SQL -> Node -> React) without physical hardware.
 
----
 
 ## Hardware Components
 
@@ -82,7 +79,7 @@ The system is custom-designed for the following physical IoT components:
 | **Relay Module** | Pump on/off switching |
 | **20-50L Tank** | Water reservoir |
 
----
+
 
 ## Technology Stack
 
@@ -96,7 +93,7 @@ The system is custom-designed for the following physical IoT components:
 | **Styling** | Tailwind CSS | Utility-first responsive design |
 | **Charts** | Recharts | Real-time SVG charting |
 
----
+
 
 ## AI Engine & Chatbot
 
@@ -110,7 +107,7 @@ The dashboard features an integrated floating Chatbot powered by Google Gemini.
 - The assistant receives the live context of the entire water grid (reservoir levels, solar power, pump health).
 - Users can ask natural language questions like *"Why is the pump health failing?"* or *"Should we turn on the pump now?"* and the AI will provide expert engineering analysis based on the live data stream.
 
----
+
 
 ## Getting Started (Local Setup)
 
@@ -146,7 +143,7 @@ npm run dev
 ```
 *The Dashboard will be available at http://localhost:5173*
 
----
+
 
 ## Hardware-in-the-Loop Simulator
 
