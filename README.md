@@ -1,14 +1,17 @@
-# AquaGrid AI
+# AquaWise (AquaGrid AI)
 
 **Smart Solar-Powered Water Management System — AI · IoT · Real-Time Dashboard**
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-3F7E44?style=flat-square)](#license)
 [![SDG 6](https://img.shields.io/badge/SDG-6%20Clean%20Water-26BDE2?style=flat-square)](https://sdgs.un.org/goals/goal6)
 [![SDG 7](https://img.shields.io/badge/SDG-7%20Clean%20Energy-FCC30B?style=flat-square&labelColor=555)](https://sdgs.un.org/goals/goal7)
+[![SDG 9](https://img.shields.io/badge/SDG-9%20Innovation-FD6925?style=flat-square)](https://sdgs.un.org/goals/goal9)
+[![SDG 11](https://img.shields.io/badge/SDG-11%20Sustainable%20Cities-FD9D24?style=flat-square)](https://sdgs.un.org/goals/goal11)
+[![SDG 13](https://img.shields.io/badge/SDG-13%20Climate%20Action-3F7E44?style=flat-square)](https://sdgs.un.org/goals/goal13)
 
-> AquaGrid AI is an open-source smart water management platform that solves a critical challenge faced by rural communities: **the lack of continuous monitoring over solar-powered water infrastructure**. Without real-time oversight, leaks, pump failures, reservoir overflow, and energy waste go unnoticed until serious damage is done.
+> AquaWise directly contributes to the United Nations Sustainable Development Goals (SDGs), particularly **SDG 6**: Clean Water and Sanitation, **SDG 7**: Affordable and Clean Energy, **SDG 9**: Industry, Innovation and Infrastructure, **SDG 11**: Sustainable Cities and Communities, and **SDG 13**: Climate Action, by promoting efficient water use, renewable energy integration, resilient infrastructure, and sustainable resource management.
 
-By combining **Live AI Models**, **Google Gemini Conversational Assistant**, and **real-time IoT sensor data**, AquaGrid AI helps communities:
+By combining **Live AI Models**, **Google Gemini Conversational Assistant**, and **real-time IoT sensor data**, AquaWise helps communities:
 - 💧 Reduce water losses through early leak detection
 - ⚡ Optimize solar energy use with AI-driven pump scheduling
 - 🔧 Prevent pump failures through predictive maintenance
