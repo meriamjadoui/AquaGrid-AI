@@ -15,6 +15,15 @@ export default function WaterPage() {
   const aiLeakRisk = leak.isLeak
     ? Math.max(sensors.leakRisk, 60)
     : Math.min(sensors.leakRisk, 30)
+  const leakSourceLabel = leak.source === 'ml-model'
+    ? 'AI Model'
+    : leak.source === 'rule-based-fallback'
+    ? 'Rule-based'
+    : null
+  const leakConfidence = Number.isFinite(Number(leak.confidence))
+    ? Math.max(0, Math.min(100, Number(leak.confidence) <= 1 ? Number(leak.confidence) * 100 : Number(leak.confidence)))
+    : null
+  const leakBadgeLabel = `${leak.isLeak ? 'Leak Detected' : aiLeakRisk > 20 ? 'Monitor' : 'All Clear'}${leakSourceLabel ? ` · ${leakSourceLabel}${leakConfidence !== null ? ` · ${Math.round(leakConfidence)}% confidence` : ''}` : ''}`
 
   return (
     <div className="space-y-6">
@@ -53,7 +62,7 @@ export default function WaterPage() {
             color={leak.isLeak ? 'text-danger' : aiLeakRisk > 20 ? 'text-warn' : 'text-battery'}
             badge={{
               type: leak.isLeak ? 'alert' : aiLeakRisk > 20 ? 'warn' : 'ok',
-              label: leak.isLeak ? 'Leak Detected' : aiLeakRisk > 20 ? 'Monitor' : 'All Clear'
+              label: leakBadgeLabel
             }}
           />
           <KpiCard

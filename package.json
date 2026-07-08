@@ -1,0 +1,16 @@
+{
+  "name": "aquagrid-ai-runner",
+  "version": "1.0.0",
+  "private": true,
+  "description": "One-command launcher for all AquaGrid-AI services (backend, ML service, simulator, dashboard)",
+  "scripts": {
+    "start:all": "concurrently -n \"SIMULATOR,BACKEND,ML,DASHBOARD\" -c \"yellow,green,magenta,cyan\" \"npm run sim\" \"npm run backend\" \"npm run ml\" \"npm run dashboard\"",
+    "sim": "node backend/esp32_simulator.js",
+    "backend": "node backend/server.js",
+    "ml": "cd backend && venv\\Scripts\\python.exe ml_service.py",
+    "dashboard": "cd dashboard && npm run dev"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

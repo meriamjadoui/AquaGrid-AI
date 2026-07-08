@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ path: require('path').resolve(__dirname, '.env') });
 const mysql = require('mysql2/promise');
 
 async function initializeDatabase() {
@@ -7,7 +7,7 @@ async function initializeDatabase() {
     // 1. Connect WITHOUT a database name to create it first
     const connection = await mysql.createConnection({
       host: process.env.DB_HOST || 'localhost',
-      port: process.env.DB_PORT || 4306,
+      port: process.env.DB_PORT || 3306,
       user: process.env.DB_USER || 'root',
       password: process.env.DB_PASSWORD || ''
     });

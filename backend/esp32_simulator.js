@@ -11,7 +11,7 @@
  * It writes directly to the MySQL database, verifying the full backend pipeline.
  */
 
-require('dotenv').config();
+require('dotenv').config({ path: require('path').resolve(__dirname, '.env') });
 const mysql = require('mysql2/promise');
 
 async function runSimulator() {
