@@ -1,0 +1,16 @@
+{
+  "users": [
+    {
+      "id": "1783446358989",
+      "email": "ahmedkbaier@gmail.com",
+      "password": "$2b$10$sBI3c5yAFCdigJQ27qTGtOxzMG.DQERVDhfl5CDVxywcYduiWw3DG"
+    },
+    {
+      "id": "1783521723384",
+      "firstName": "ahmed",
+      "lastName": "kbaier",
+      "email": "ahmedkbaier7@gmail.com",
+      "password": "$2b$10$AqJSQV/mFlJfq7Gs50LQCeG..Zdh1U72Pz7s/Sgs3uydQgQfm8LN."
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-import React, { useEffect, Component } from 'react'
+import React, { useEffect, useState, Component } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Layout from './components/Layout/Layout'
 import Overview from './pages/Overview'
@@ -8,6 +8,8 @@ import AIPage from './pages/AIPage'
 import AlertsPage from './pages/AlertsPage'
 import AuditPage from './pages/AuditPage'
 import SettingsPage from './pages/SettingsPage'
+import LoginPage from './pages/LoginPage'
+import SignUpPage from './pages/SignUpPage'
 import { useAIEngine } from './ai/useAIEngine'
 import useStore from './store/useStore'
 import useAuditLog from './store/useAuditLog'
@@ -58,25 +60,75 @@ function AuditBootstrap() {
   return null
 }
 
+function useAuthCheck() {
+  const [isAuthenticated, setIsAuthenticated] = useState(null)
+  const [userEmail, setUserEmail] = useState(null)
+
+  useEffect(() => {
+    fetch('/api/me')
+      .then(res => {
+        if (res.ok) return res.json()
+        throw new Error('Not authenticated')
+      })
+      .then(data => {
+        setIsAuthenticated(true)
+        setUserEmail(data.email)
+      })
+      .catch(() => {
+        setIsAuthenticated(false)
+      })
+  }, [])
+
+  return { isAuthenticated, userEmail }
+}
+
+function ProtectedRoute({ isAuthenticated, children }) {
+  if (isAuthenticated === null) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0c1015', color: '#e2e8f0' }}>
+        Chargement...
+      </div>
+    )
+  }
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />
+  }
+  // AIProvider et AuditBootstrap ne tournent QUE quand l'utilisateur est bien connecté
+  return (
+    <AIProvider>
+      <AuditBootstrap />
+      {children}
+    </AIProvider>
+  )
+}
+
 export default function App() {
+  const { isAuthenticated } = useAuthCheck()
+
   return (
     <ErrorBoundary>
       <BrowserRouter>
-        <AIProvider>
-          <AuditBootstrap />
-          <Layout>
-            <Routes>
-              <Route path="/"         element={<Navigate to="/overview" replace />} />
-              <Route path="/overview" element={<Overview />} />
-              <Route path="/water"    element={<WaterPage />} />
-              <Route path="/energy"   element={<EnergyPage />} />
-              <Route path="/ai"       element={<AIPage />} />
-              <Route path="/alerts"   element={<AlertsPage />} />
-              <Route path="/audit"    element={<AuditPage />} />
-              <Route path="/settings" element={<SettingsPage />} />
-            </Routes>
-          </Layout>
-        </AIProvider>
+        <Routes>
+          <Route path="/login" element={<LoginPage onLoginSuccess={() => { window.location.href = '/overview' }} />} />
+          <Route path="/signup" element={<SignUpPage />} />
+
+          <Route path="/*" element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <Layout>
+                <Routes>
+                  <Route path="/"         element={<Navigate to="/overview" replace />} />
+                  <Route path="/overview" element={<Overview />} />
+                  <Route path="/water"    element={<WaterPage />} />
+                  <Route path="/energy"   element={<EnergyPage />} />
+                  <Route path="/ai"       element={<AIPage />} />
+                  <Route path="/alerts"   element={<AlertsPage />} />
+                  <Route path="/audit"    element={<AuditPage />} />
+                  <Route path="/settings" element={<SettingsPage />} />
+                </Routes>
+              </Layout>
+            </ProtectedRoute>
+          } />
+        </Routes>
       </BrowserRouter>
     </ErrorBoundary>
   )
