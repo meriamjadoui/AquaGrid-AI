@@ -8,9 +8,10 @@ import AIPage from './pages/AIPage'
 import AlertsPage from './pages/AlertsPage'
 import AuditPage from './pages/AuditPage'
 import SettingsPage from './pages/SettingsPage'
-import { useAIEngine } from './ai/useAIEngine'
+import { AIProvider } from './ai/useAIEngine'
 import useStore from './store/useStore'
 import useAuditLog from './store/useAuditLog'
+import ChatBot from './chat/ChatBot'
 
 class ErrorBoundary extends Component {
   constructor(props) { super(props); this.state = { error: null } }
@@ -43,13 +44,6 @@ class ErrorBoundary extends Component {
   }
 }
 
-function AIProvider({ children }) {
-  const ai = useAIEngine()
-  const setAiResults = useStore(s => s.setAiResults)
-  useEffect(() => { setAiResults(ai) }, [ai])
-  return <>{children}</>
-}
-
 function AuditBootstrap() {
   const record = useAuditLog(s => s.record)
   useEffect(() => {
@@ -77,6 +71,7 @@ export default function App() {
             </Routes>
           </Layout>
         </AIProvider>
+        <ChatBot />
       </BrowserRouter>
     </ErrorBoundary>
   )

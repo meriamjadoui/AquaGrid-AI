@@ -189,10 +189,39 @@ const impactBase = {
 }
 
 const useStore = create((set, get) => {
-  // Live sensor tick
-  setInterval(() => {
+  // Live sensor tick - fetches from Backend API or falls back to mock data
+  setInterval(async () => {
     const { sensors, history, pumpOn, aiResults, alerts, impact } = get()
-    const next = tickSensors(sensors, pumpOn)
+    let next = null;
+
+    try {
+      // Attempt to fetch real ESP32 data from the MySQL backend
+      const res = await fetch('http://localhost:3001/api/system-overview/latest');
+      if (res.ok) {
+        const row = await res.json();
+        // Map database columns to dashboard sensor format
+        next = {
+          ...sensors,
+          reservoirLevel: Number(row.reservoir_level),
+          flowRate: Number(row.flow_rate),
+          totalConsumed: Number(row.water_consumed),
+          solarProduction: Number(row.solar_power),
+          batteryCharge: Number(row.battery_level),
+          pumpPower: Number(row.pump_power),
+          pumpTemp: Number(row.pump_temperature),
+          pumpHealthScore: Number(row.pump_health),
+          wifiRssi: Number(row.wifi_signal),
+        };
+      }
+    } catch (err) {
+      // Silently fall back to mock simulation if the backend is not running
+    }
+
+    // If fetch failed or returned invalid data, use the mock simulator
+    if (!next) {
+      next = tickSensors(sensors, pumpOn)
+    }
+
     const { newAlerts, newAuditEvents } = generateAlerts(next, aiResults, alerts)
     const merged = [...newAlerts, ...alerts].slice(0, MAX_ALERTS)
     if (newAuditEvents.length > 0) {
