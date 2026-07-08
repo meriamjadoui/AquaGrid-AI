@@ -95,6 +95,9 @@ INSTRUCTIONS:
     if (error.message?.includes('API key not valid') || error.message?.includes('invalid authentication credentials')) {
       return '\u26A0\uFE0F **API Key Invalid**\n\nThe provided Gemini API key is incorrect or expired. Please check your settings.'
     }
+    if (error.message?.includes('429') || error.message?.includes('quota') || error.message?.includes('Too Many Requests')) {
+      return '\u26A0\uFE0F **Quota Exceeded**\n\nYour API key has reached its rate limit or daily quota. Please try again later or check your billing details.'
+    }
     return '\u26A0\uFE0F **Connection Error**\n\nI couldn\'t reach the AI server right now. Please try again in a moment.'
   }
 }
