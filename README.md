@@ -28,7 +28,7 @@ By combining **Live AI Models**, **Google Gemini Conversational Assistant**, and
 6. [Hardware-in-the-Loop Simulator](#hardware-in-the-loop-simulator)
 
 
-## System Architecture
+## 1 * System Architecture
 
 The platform is structured in a robust, decoupled, 3-tier architecture:
 
@@ -62,7 +62,7 @@ The platform is structured in a robust, decoupled, 3-tier architecture:
 - **Hardware-in-the-Loop Simulation:** A dedicated `esp32_simulator.js` script allows developers and juries to test the full data pipeline (SQL -> Node -> React) without physical hardware.
 
 
-## Hardware Components
+## 2 * Hardware Components
 
 The system is custom-designed for the following physical IoT components:
 
@@ -81,7 +81,7 @@ The system is custom-designed for the following physical IoT components:
 
 
 
-## Technology Stack
+## 3 * Technology Stack
 
 | Layer | Technology | Description |
 |--------|------------|---------|
@@ -95,7 +95,7 @@ The system is custom-designed for the following physical IoT components:
 
 
 
-## AI Engine & Chatbot
+## 4 * AI Engine & Chatbot
 
 ### 1. In-Browser Analytics Models
 AquaGrid features custom algorithmic models running in the browser to analyze:
@@ -109,7 +109,7 @@ The dashboard features an integrated floating Chatbot powered by Google Gemini.
 
 
 
-## Getting Started (Local Setup)
+## 5 * Getting Started (Local Setup)
 
 ### Prerequisites
 - Node.js 18+ 
@@ -145,7 +145,7 @@ npm run dev
 
 
 
-## Hardware-in-the-Loop Simulator
+## 6 * Hardware-in-the-Loop Simulator
 
 To evaluate the software without access to the physical ESP32 and water sensors, we have built a **Mock Data Injector**. 
 
