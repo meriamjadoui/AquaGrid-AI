@@ -1,7 +1,8 @@
-require('dotenv').config();
+require('dotenv').config({ path: require('path').resolve(__dirname, '.env') });
 const express = require('express');
 const mysql = require('mysql2/promise');
 const cors = require('cors');
+const axios = require('axios');                    // ← ADDED
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -46,6 +47,33 @@ app.get('/api/system-overview/latest', async (req, res) => {
   } catch (err) {
     console.error('Database query error:', err);
     res.status(500).json({ error: 'Failed to retrieve data from database' });
+  }
+});
+
+// ============================================================ // ← ADDED
+// ML LEAK PREDICTION — proxies to the Python ml_service.py      // ← ADDED
+// ============================================================ // ← ADDED
+app.post('/api/predict-leak', async (req, res) => {
+  const { currentloss, rollingmeanloss, rollingstdloss, consecutivehigh } = req.body;
+
+  try {
+    const response = await axios.post('http://localhost:5001/predict', {
+      currentloss,
+      rollingmeanloss,
+      rollingstdloss,
+      consecutivehigh,
+    }, { timeout: 3000 });
+
+    return res.json(response.data);
+  } catch (err) {
+    // Safe fallback: if the Python ML service is down, don't break the
+    // dashboard — just report that live prediction is unavailable so the
+    // frontend can fall back to the existing rule-based leak_model.js
+    console.error('ML service unreachable:', err.message);
+    return res.status(503).json({
+      error: 'ML service unavailable',
+      fallback: true,
+    });
   }
 });
 

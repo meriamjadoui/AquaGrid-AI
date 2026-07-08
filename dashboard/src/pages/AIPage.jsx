@@ -28,6 +28,14 @@ export default function AIPage() {
   const aiLeakRisk = leak.isLeak
     ? Math.max(sensors.leakRisk, 60)
     : Math.min(sensors.leakRisk, 30)
+  const leakSourceLabel = leak.source === 'ml-model'
+    ? 'AI Model'
+    : leak.source === 'rule-based-fallback'
+    ? 'Rule-based'
+    : null
+  const leakConfidence = Number.isFinite(Number(leak.confidence))
+    ? Math.max(0, Math.min(100, Number(leak.confidence) <= 1 ? Number(leak.confidence) * 100 : Number(leak.confidence)))
+    : null
 
   const cards = [
     {
@@ -37,6 +45,7 @@ export default function AIPage() {
       ringColor: '#fff',
       status: leak.isLeak ? 'alert' : aiLeakRisk > 20 ? 'warn' : 'ok',
       statusLabel: leak.isLeak ? '⚠ Leak Detected' : aiLeakRisk > 20 ? 'Monitor' : 'No Leak',
+      sourceLabel: leakSourceLabel,
       desc: leak.isLeak
         ? `A possible leak has been detected. Current flow rate is ${sensors.flowRate} L/min. Please inspect the pipeline.`
         : `No leak detected. Water flow is normal at ${sensors.flowRate} L/min.`,
@@ -151,6 +160,20 @@ export default function AIPage() {
             <div className="flex items-center gap-2">
               <card.icon size={16} style={{ color: 'rgba(255,255,255,0.9)' }} strokeWidth={1.8} />
               <h3 className="text-sm font-bold opacity-95">{card.title}</h3>
+              {card.sourceLabel && (
+                <span
+                  className="ml-1 rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.14em]"
+                  style={{
+                    color: 'rgba(255,255,255,0.88)',
+                    borderColor: 'rgba(255,255,255,0.22)',
+                    background: 'rgba(255,255,255,0.10)',
+                    backdropFilter: 'blur(4px)',
+                  }}
+                  title={`Leak result source: ${card.sourceLabel}${leakConfidence !== null ? `, ${Math.round(leakConfidence)}% confidence` : ''}`}
+                >
+                  {card.sourceLabel}{leakConfidence !== null ? ` · ${Math.round(leakConfidence)}% confidence` : ''}
+                </span>
+              )}
               <ArrowUpRight size={14} className="ml-auto opacity-60" />
             </div>
             <div className="flex justify-center">

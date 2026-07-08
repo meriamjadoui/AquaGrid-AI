@@ -21,6 +21,7 @@
 import { useEffect, useRef } from 'react'
 import useStore from '../store/useStore'
 import { makeLeakDetector }        from './leak_model'
+import { predictLeakWithModel }    from './leak_model_service'
 import { makeMaintenanceDetector } from './maintenance_model'
 import { makePHDetector }          from './ph_model'
 import { makeEnergyForecaster }    from './energy_model_v2'
@@ -98,6 +99,8 @@ export function useAIEngine() {
   const forecastEnergy    = useRef(makeEnergyForecaster()).current
 
   useEffect(() => {
+    let cancelled = false
+
     const { flowRate, reservoirLevel, pumpMotorCurrent, pumpTemp, solarProduction } = sensors
     const hour = new Date().getHours()
 
@@ -105,11 +108,21 @@ export function useAIEngine() {
     const lossRatio = flowRate / Math.max(reservoirLevel, 1)
     const lossWindow = pushWindow(lossRatioWindow, lossRatio)
     const lossRollingMean = lossWindow.reduce((a, b) => a + b, 0) / lossWindow.length
+    const lossRollingStd = Math.sqrt(
+      lossWindow.reduce((a, b) => a + (b - lossRollingMean) ** 2, 0) / lossWindow.length
+    )
     consecutiveLeak.current = lossRatio > 0.15
       ? consecutiveLeak.current + 1
       : Math.max(0, consecutiveLeak.current - 1)
 
-    const leak = detectLeak({ lossRatio, rollingMean: lossRollingMean, consecutiveHighLoss: consecutiveLeak.current })
+    const leakFeatures = {
+      currentloss: lossRatio,
+      rollingmeanloss: lossRollingMean,
+      rollingstdloss: lossRollingStd,
+      consecutivehigh: consecutiveLeak.current,
+    }
+
+    const leakPromise = predictLeakWithModel(leakFeatures, 3000).catch(() => null)
 
     // ── Predictive Maintenance features ────────────────────────────────────────
     const efficiency = flowRate > 0 ? pumpMotorCurrent / flowRate : 0
@@ -140,7 +153,8 @@ export function useAIEngine() {
     // ── Adaptive Autoencoder Anomaly Detection ───────────────────────────────
     // We run the TensorFlow.js predictions and training asynchronously so we don't block the UI thread.
     const runDeepLearning = async () => {
-      let anomalyScore = useStore.getState().aiResults.anomalyScore ?? 0;
+      let anomalyScore = useStore.getState().aiResults.anomalyScore ?? 0
+      let leak = await leakPromise
       
       if (!autoencoder.isReady && !autoencoder.isTraining) {
         const history = useStore.getState().history;
@@ -151,6 +165,23 @@ export function useAIEngine() {
       } else if (autoencoder.isReady && !autoencoder.isTraining) {
         anomalyScore = await autoencoder.predictAnomaly(sensors);
       }
+
+      if (!leak) {
+        const fallbackLeak = detectLeak(lossRatio)
+        leak = {
+          ...fallbackLeak,
+          confidence: fallbackLeak.isLeak ? 0.75 : 0.85,
+          source: 'rule-based-fallback',
+        }
+      } else {
+        leak = {
+          ...leak,
+          rollingMean: lossRollingMean,
+          consecutiveHigh: consecutiveLeak.current,
+        }
+      }
+
+      if (cancelled) return
 
       // Push all results to the Zustand store in a single update
       setAiResults({
@@ -168,5 +199,8 @@ export function useAIEngine() {
     };
 
     runDeepLearning();
+    return () => {
+      cancelled = true
+    }
   }, [sensors])
 }
