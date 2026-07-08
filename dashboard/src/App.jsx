@@ -10,9 +10,10 @@ import AuditPage from './pages/AuditPage'
 import SettingsPage from './pages/SettingsPage'
 import LoginPage from './pages/LoginPage'
 import SignUpPage from './pages/SignUpPage'
-import { useAIEngine } from './ai/useAIEngine'
+import { AIProvider } from './ai/useAIEngine'
 import useStore from './store/useStore'
 import useAuditLog from './store/useAuditLog'
+import ChatBot from './chat/ChatBot'
 
 class ErrorBoundary extends Component {
   constructor(props) { super(props); this.state = { error: null } }
@@ -43,13 +44,6 @@ class ErrorBoundary extends Component {
     }
     return this.props.children
   }
-}
-
-function AIProvider({ children }) {
-  const ai = useAIEngine()
-  const setAiResults = useStore(s => s.setAiResults)
-  useEffect(() => { setAiResults(ai) }, [ai])
-  return <>{children}</>
 }
 
 function AuditBootstrap() {
@@ -126,6 +120,7 @@ export default function App() {
                   <Route path="/settings" element={<SettingsPage />} />
                 </Routes>
               </Layout>
+              <ChatBot />
             </ProtectedRoute>
           } />
         </Routes>

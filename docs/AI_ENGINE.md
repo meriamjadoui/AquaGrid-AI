@@ -14,11 +14,13 @@ to read or extend the code.
 4. [Model 2 — Predictive Maintenance](#4-model-2--predictive-maintenance)
 5. [Model 3 — Water Quality (pH Proxy)](#5-model-3--water-quality-ph-proxy)
 6. [Model 4 — Solar Energy Forecast + Panel Soiling](#6-model-4--solar-energy-forecast--panel-soiling)
-7. [Central Hook — useAIEngine](#7-central-hook--useaiengine)
-8. [Rolling Window Helper](#8-rolling-window-helper)
-9. [Feature Engineering Summary](#9-feature-engineering-summary)
-10. [Adding a New Model](#10-adding-a-new-model)
-11. [File Map](#11-file-map)
+7. [Model 5 — Conversational LLM (Google Gemini)](#7-model-5--conversational-llm-google-gemini)
+8. [Central Hook — useAIEngine](#8-central-hook--useaiengine)
+9. [Rolling Window Helper](#9-rolling-window-helper)
+10. [Feature Engineering Summary](#10-feature-engineering-summary)
+11. [Adding a New Model](#11-adding-a-new-model)
+12. [File Map](#12-file-map)
+
 
 ---
 
@@ -254,7 +256,26 @@ tick and decides if panels are dirty.
 
 ---
 
-## 7. Central Hook — useAIEngine
+## 7. Model 5 — Conversational LLM (Google Gemini)
+
+**File**: `dashboard/src/chat/chatEngine.js`
+
+### Problem
+While the statistical Random Forest models are excellent at detecting specific numerical anomalies, human operators often need high-level qualitative analysis and troubleshooting advice (e.g., "Why is the pump drawing so much power?").
+
+### Algorithm — Large Language Model (Gemini)
+We integrated Google's **Gemini 1.5** via the `@google/generative-ai` SDK to serve as a conversational AI expert.
+
+### System Prompt & Context Injection
+Every time the user asks a question, `chatEngine.js` intercepts the message and silently injects a **System Prompt**. This prompt contains:
+1. The AI's persona (expert IoT water management engineer).
+2. The **Live System State** stringified directly from the Zustand store (current flow rate, reservoir level, active alerts, pump health, etc.).
+
+By passing the live IoT state alongside the user's question, Gemini has perfect situational awareness of the water grid and can provide highly specific, real-time engineering advice.
+
+---
+
+## 8. Central Hook — useAIEngine
 
 **File**: `dashboard/src/ai/useAIEngine.js`
 
@@ -299,7 +320,7 @@ hook is always active regardless of which page is currently rendered.
 
 ---
 
-## 8. Rolling Window Helper
+## 9. Rolling Window Helper
 
 ```js
 function pushWindow(ref, value, size = 10) {
@@ -314,7 +335,7 @@ statistics on it.
 
 ---
 
-## 9. Feature Engineering Summary
+## 10. Feature Engineering Summary
 
 | Model        | Raw inputs                                          | Derived features                              |
 |--------------|-----------------------------------------------------|-----------------------------------------------|
@@ -326,7 +347,7 @@ statistics on it.
 
 ---
 
-## 10. Adding a New Model
+## 11. Adding a New Model
 
 1. **Create** `dashboard/src/ai/my_model.js`
    - Write a `predictX(features)` ensemble function
@@ -343,7 +364,7 @@ statistics on it.
 
 ---
 
-## 11. File Map
+## 12. File Map
 
 ```
 dashboard/src/

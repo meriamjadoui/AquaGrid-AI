@@ -24,6 +24,7 @@ import { makeLeakDetector }        from './leak_model'
 import { makeMaintenanceDetector } from './maintenance_model'
 import { makePHDetector }          from './ph_model'
 import { makeEnergyForecaster }    from './energy_model_v2'
+import { autoencoder }             from './adaptive_anomaly_model'
 
 /**
  * Rolling window helper.
@@ -136,16 +137,36 @@ export function useAIEngine() {
     const panelEfficiencyRatio = solarProduction / Math.max(theoreticalMax, 1)
     const energy = forecastEnergy({ solarProduction, pumpMotorCurrent, hour, efficiency: panelEfficiencyRatio })
 
-    // Push all results to the Zustand store in a single update
-    setAiResults({
-      leak,
-      maintenance,
-      ph,
-      solarForecast:  energy?.forecast  ?? 0,
-      panel: {
-        needsCleaning: energy?.needsCleaning ?? false,
-        ratio:         panelEfficiencyRatio,
-      },
-    })
+    // ── Adaptive Autoencoder Anomaly Detection ───────────────────────────────
+    // We run the TensorFlow.js predictions and training asynchronously so we don't block the UI thread.
+    const runDeepLearning = async () => {
+      let anomalyScore = useStore.getState().aiResults.anomalyScore ?? 0;
+      
+      if (!autoencoder.isReady && !autoencoder.isTraining) {
+        const history = useStore.getState().history;
+        if (history.length > 20) {
+          // Fire and forget training (runs in background)
+          autoencoder.train(history); 
+        }
+      } else if (autoencoder.isReady && !autoencoder.isTraining) {
+        anomalyScore = await autoencoder.predictAnomaly(sensors);
+      }
+
+      // Push all results to the Zustand store in a single update
+      setAiResults({
+        leak,
+        maintenance,
+        ph,
+        solarForecast:  energy?.forecast  ?? 0,
+        panel: {
+          needsCleaning: energy?.needsCleaning ?? false,
+          ratio:         panelEfficiencyRatio,
+        },
+        anomalyScore,
+        autoencoderStatus: autoencoder.isTraining ? 'Training...' : (autoencoder.isReady ? 'Active' : 'Gathering baseline data...'),
+      });
+    };
+
+    runDeepLearning();
   }, [sensors])
 }
