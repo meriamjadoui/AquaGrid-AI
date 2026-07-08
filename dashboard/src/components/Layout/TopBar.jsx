@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { useLocation } from 'react-router-dom'
-import { RefreshCw, Sun, Moon, LogOut, Settings, User as UserIcon, Briefcase, Search } from 'lucide-react'
+import { RefreshCw, Sun, Moon, LogOut, Settings, User as UserIcon, Briefcase } from 'lucide-react'
 import useStore from '../../store/useStore'
 import { formatDistanceToNow } from 'date-fns'
 
@@ -90,17 +90,8 @@ export default function TopBar() {
         </div>
       </div>
 
-      {/* Search bar (centered capsule) */}
-      <div className="flex-1 flex justify-center">
-        <div className="search-capsule hidden sm:flex">
-          <Search size={15} style={{ color: 'var(--color-text-faint)' }} className="shrink-0" />
-          <input
-            type="text"
-            placeholder="Search sensors, alerts, reports..."
-            readOnly
-          />
-        </div>
-      </div>
+      {/* Spacer to push right actions to the right */}
+      <div className="flex-1"></div>
 
       {/* Right actions */}
       <div className="flex items-center gap-2">

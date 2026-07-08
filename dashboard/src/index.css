@@ -398,35 +398,6 @@
     100% { transform: translateX(100%); }
   }
 
-  /* ── Search bar (capsule) ── */
-  .search-capsule {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    border-radius: var(--radius-pill);
-    background: var(--color-surface-bg);
-    border: 1px solid var(--color-surface-border);
-    transition: all 0.3s ease;
-    max-width: 380px;
-    width: 100%;
-  }
-  .search-capsule:focus-within {
-    border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px var(--color-primary-dim);
-  }
-  .search-capsule input {
-    background: none;
-    border: none;
-    outline: none;
-    font-size: 0.8125rem;
-    color: var(--color-text);
-    width: 100%;
-    font-weight: 500;
-  }
-  .search-capsule input::placeholder {
-    color: var(--color-text-faint);
-  }
 
   /* ── Trend arrow indicators ── */
   .trend-up {
