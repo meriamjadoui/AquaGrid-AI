@@ -67,7 +67,7 @@ export default function AlertsPage() {
           {[
             { sensor: 'Reservoir Level', condition: '< 20%',  action: 'Push notification + pump start' },
             { sensor: 'Reservoir Level', condition: '> 90%',  action: 'Pump stop' },
-            { sensor: 'Leak Risk (AI)',  condition: '> 40%',  action: 'Push alert + log event' },
+            { sensor: 'Leak Risk',       condition: '> 40%',  action: 'Push alert + log event' },
             { sensor: 'Battery SoC',     condition: '< 25%',  action: 'Push warning + reduce pump cycles' },
             { sensor: 'Pump Temp',       condition: '> 65°C', action: 'Emergency pump stop + alert' },
           ].map(r => (

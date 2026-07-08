@@ -32,7 +32,7 @@ export default function EnergyPage() {
           <GaugeRing value={sensors.pumpPower} max={100} color="#8B5CF6" label="Pump (W)" unit="W" />
         </div>
         <div className="card-gradient mesh-gradient-teal-blue flex flex-col items-center py-5">
-          <GaugeRing value={Math.min(100, Math.max(0, solarForecast))} max={100} color="rgba(255,255,255,0.9)" label="AI Forecast" unit="W" />
+          <GaugeRing value={Math.min(100, Math.max(0, solarForecast))} max={100} color="rgba(255,255,255,0.9)" label="Smart Forecast" unit="W" />
         </div>
       </div>
 

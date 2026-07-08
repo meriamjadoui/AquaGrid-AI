@@ -99,8 +99,8 @@ export default function AIPage() {
               <Network size={20} style={{ color: '#ffffff' }} strokeWidth={2} />
             </div>
             <div>
-              <h3 className="text-lg font-bold tracking-tight" style={{ color: 'var(--color-text)' }}>Adaptive Anomaly Detector</h3>
-              <p className="text-xs font-medium" style={{ color: 'var(--color-text-muted)' }}>Powered by TensorFlow.js Deep Learning</p>
+              <h3 className="text-lg font-bold tracking-tight" style={{ color: 'var(--color-text)' }}>System Health Monitor</h3>
+              <p className="text-xs font-medium" style={{ color: 'var(--color-text-muted)' }}>Powered by Advanced Analytics</p>
             </div>
           </div>
           <span className="badge-info text-xs px-3 py-1 bg-indigo-50 text-indigo-700 border border-indigo-200">
@@ -112,7 +112,7 @@ export default function AIPage() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 items-center">
           <div className="col-span-2 flex flex-col gap-4">
             <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>
-              This model utilizes an in-browser Autoencoder neural network. It continuously learns your system's normal operational baseline from historical data. If a multi-sensor pattern deviates from the trained weights, it instantly flags a structural anomaly.
+              This system continuously learns your equipment's normal operational baseline from historical data. If a multi-sensor pattern deviates from the expected behavior, it instantly flags a potential issue.
             </p>
             <div className="flex items-center gap-5 text-xs font-semibold" style={{ color: 'var(--color-text)' }}>
               <span className="flex items-center gap-2">

@@ -7,7 +7,7 @@ import AquaLineChart from '../components/Charts/LineChart'
 import { AlertItem } from '../components/UI/AlertBadge'
 import { getStatus } from '../utils/mockData'
 
-// Derive AI-recommended pump schedule from solar forecast
+// Derive optimal pump schedule from solar forecast
 function getPumpSchedule(sensors, aiResults) {
   const h = new Date().getHours()
   const solar = sensors.solarProduction
@@ -153,13 +153,13 @@ export default function Overview() {
           badge={{ type: sensors.wifiRssi > -65 ? 'ok' : 'warn', label: sensors.wifiRssi > -65 ? 'Strong' : 'Weak' }} />
       </div>
 
-      {/* ── AI Pump Scheduler ── */}
+      {/* ── Smart Pump Scheduler ── */}
       <div className="card">
         <div className="flex items-center gap-2 mb-4">
           <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'rgba(245,158,11,0.10)' }}>
             <Sun size={16} style={{ color: '#F59E0B' }} strokeWidth={1.8} />
           </div>
-          <h3 className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>AI Pump Scheduling</h3>
+          <h3 className="text-sm font-bold" style={{ color: 'var(--color-text)' }}>Smart Pump Scheduling</h3>
           <span
             className="ml-auto text-[10px] font-bold px-3 py-1 rounded-full"
             style={{

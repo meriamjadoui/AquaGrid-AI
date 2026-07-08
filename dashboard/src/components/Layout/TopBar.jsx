@@ -8,7 +8,7 @@ const PAGE_TITLES = {
   '/overview': 'Overview',
   '/water': 'Water Monitoring',
   '/energy': 'Energy Management',
-  '/ai': 'AI Insights',
+  '/ai': 'Insights',
   '/alerts': 'Alerts',
   '/audit': 'Audit Log',
   '/settings': 'Settings',

@@ -11,7 +11,7 @@ const NAV = [
   { to: '/overview', icon: LayoutDashboard, label: 'Overview'     },
   { to: '/water',    icon: Droplets,        label: 'Water'        },
   { to: '/energy',   icon: Zap,             label: 'Energy'       },
-  { to: '/ai',       icon: BrainCircuit,    label: 'AI Insights'  },
+  { to: '/ai',       icon: BrainCircuit,    label: 'Insights'  },
   { to: '/alerts',   icon: BellRing,        label: 'Alerts'       },
   { to: '/audit',    icon: ClipboardList,   label: 'Audit Log'    },
 ]
