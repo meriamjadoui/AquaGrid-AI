@@ -49,5 +49,5 @@ def health():
 
 
 if __name__ == "__main__":
-    print("🧠 ML service starting on http://localhost:5001")
+    print("ML service starting on http://localhost:5001")
     app.run(port=5001, debug=False)
