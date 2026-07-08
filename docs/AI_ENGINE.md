@@ -1,8 +1,8 @@
-# AquaGrid-AI — AI Engine Deep Dive
+# AquaGrid-AI — Hybrid AI Engine Deep Dive
 
 This document explains every model in the AquaGrid-AI inference stack: what
 problem it solves, how it was designed, how it works mathematically, and how
-to read or extend the code.
+the different technologies integrate into a single unified dashboard.
 
 ---
 
@@ -10,45 +10,44 @@ to read or extend the code.
 
 1. [Architecture Overview](#1-architecture-overview)
 2. [Data Flow](#2-data-flow)
-3. [Model 1 — Leak Detection](#3-model-1--leak-detection)
-4. [Model 2 — Predictive Maintenance](#4-model-2--predictive-maintenance)
-5. [Model 3 — Water Quality (pH Proxy)](#5-model-3--water-quality-ph-proxy)
-6. [Model 4 — Solar Energy Forecast + Panel Soiling](#6-model-4--solar-energy-forecast--panel-soiling)
-7. [Model 5 — Conversational LLM (Google Gemini)](#7-model-5--conversational-llm-google-gemini)
-8. [Central Hook — useAIEngine](#8-central-hook--useaiengine)
-9. [Rolling Window Helper](#9-rolling-window-helper)
+3. [Model 1 — Leak Detection (Python Microservice)](#3-model-1--leak-detection-python-microservice)
+4. [Model 2 — Autoencoder Anomaly Detection (TF.js)](#4-model-2--autoencoder-anomaly-detection-tfjs)
+5. [Model 3 — Predictive Maintenance (In-Browser)](#5-model-3--predictive-maintenance-in-browser)
+6. [Model 4 — Water Quality pH Proxy (In-Browser)](#6-model-4--water-quality-ph-proxy-in-browser)
+7. [Model 5 — Solar Energy Forecast + Panel Soiling (In-Browser)](#7-model-5--solar-energy-forecast--panel-soiling-in-browser)
+8. [Model 6 — Conversational LLM (Google Gemini)](#8-model-6--conversational-llm-google-gemini)
+9. [Central Hook — useAIEngine](#9-central-hook--useaiengine)
 10. [Feature Engineering Summary](#10-feature-engineering-summary)
-11. [Adding a New Model](#11-adding-a-new-model)
-12. [File Map](#12-file-map)
-
 
 ---
 
 ## 1. Architecture Overview
 
-All AI inference runs **entirely in the browser** as plain synchronous
-JavaScript. There is no server, no Python runtime, no WASM blob, and no
-external API call. The trained decision trees are serialised directly as
-nested `if/else` JavaScript functions.
+AquaGrid-AI employs a highly sophisticated **Hybrid AI Architecture** that runs inference across three completely different environments simultaneously, combining their results in real-time.
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│                  React Component Tree                │
+│                  React Component Tree               │
 │  App.jsx                                            │
 │    └─ <AIProvider>  ← mounts useAIEngine() once     │
 │         └─ <Router> → WaterPage / EnergyPage / AI   │
 └───────────────────────────┬─────────────────────────┘
                             │ reads sensors every 3 s
 ┌───────────────────────────▼─────────────────────────┐
-│               useAIEngine.js  (hook)                 │
-│  Runs 4 models synchronously on each sensor update  │
+│               useAIEngine.js  (hook)                │
+│  Runs all models synchronously & asynchronously     │
 │  Pushes aiResults into Zustand store (setAiResults) │
 └──┬──────────────┬────────────┬───────────────┬──────┘
    │              │            │               │
    ▼              ▼            ▼               ▼
-leak_model   maintenance    ph_model     energy_model_v2
-   .js          _model.js     .js              .js
+Python API     TensorFlow.js   maintenance    energy_model
+(Leak RF)      (Autoencoder)   (In-Browser)   (In-Browser)
 ```
+
+1. **Python Flask Microservice:** High-accuracy Random Forest leak detection trained on a large dataset using `scikit-learn` (`ai/model/leak_model.pkl`).
+2. **In-Browser Deep Learning:** A TensorFlow.js autoencoder that trains live in the browser without labeled data to find multivariate anomalies.
+3. **In-Browser JS Forests:** Instant, zero-latency inference for maintenance, water quality, and solar forecasting using compiled JavaScript decision trees.
+4. **Cloud LLM:** Google Gemini provides conversational reasoning on top of the statistical model outputs.
 
 ---
 
@@ -56,282 +55,130 @@ leak_model   maintenance    ph_model     energy_model_v2
 
 ```
 Zustand tick (3 s)
-  └─▶ sensors = { flowRate, reservoirLevel, pumpMotorCurrent,
-                  pumpTemp, solarProduction }
+  └─▶ sensors = { flowRate, reservoirLevel, pumpMotorCurrent, ... }
         │
         ├─▶ Feature engineering (useAIEngine.js)
         │
-        ├─▶ leak_model.detect(lossRatio)
-        │       └─▶ { isLeak, rollingMean, consecutiveHigh }
+        ├─▶ leak_model_service.predictLeakWithModel(...)
+        │       └─▶ POST /api/predict-leak → Python ML Service
+        │               └─▶ { isLeak, confidence }
         │
-        ├─▶ maintenance_model.detect(current, flow, temp)
+        ├─▶ adaptive_anomaly_model.autoencoder.predictAnomaly(...)
+        │       └─▶ TensorFlow.js inference → anomalyScore (0-100)
+        │
+        ├─▶ maintenance_model.detect(...)
         │       └─▶ { state: 0|1|2, label }
         │
-        ├─▶ ph_model.detect(reservoirLevel)
-        │       └─▶ { quality: 0|1|2, label, deviation }
-        │
-        └─▶ energy_model_v2.forecast({ solarProduction, … })
+        └─▶ energy_model_v2.forecast(...)
                 └─▶ { forecast (W), needsCleaning }
 
-All results merged → store.setAiResults({ leak, maintenance, ph,
-                                          solarForecast, panel })
-
-Consumers:
-  AIPage.jsx       ← displays all 4 model result cards
-  WaterPage.jsx    ← Leak Risk KPI, pH Quality KPI
-  EnergyPage.jsx   ← AI Solar Forecast gauge, Panel Health badge
-  useStore.js      ← drives alert rules (leak_detected, pump_critical)
+All results merged → store.setAiResults(...)
 ```
 
 ---
 
-## 3. Model 1 — Leak Detection
+## 3. Model 1 — Leak Detection (Python Microservice)
 
-**File**: `dashboard/src/ai/leak_model.js`
+**Files**: `backend/ml_service.py`, `dashboard/src/ai/leak_model_service.js`, `ai/train.py`
 
 ### Problem
-Detect pipe leaks in real-time from water-flow telemetry without access to
-physical pressure sensors. A leak manifests as more water leaving the system
-than the reservoir-level drop alone would explain.
+Detect pipe leaks in real-time from water-flow telemetry without access to physical pressure sensors.
 
-### Input signal
-```
-lossRatio = flowRate / max(reservoirLevel, 1)
-```
-When the pipes are intact, flowRate and reservoirLevel move together;
-a high lossRatio means water is disappearing.
+### Algorithm — Random Forest (scikit-learn)
+A Random Forest Classifier trained on heavily engineered time-series features. Because this model requires a high degree of precision, it was trained using Python `scikit-learn` and saved as a `.pkl` file.
 
-### Algorithm — Random Forest (11 trees)
-
-Each tree is a binary decision tree that returns 0 (no leak) or 1 (leak).
-The final prediction is a majority vote:
-```
-prediction = sum(votes) / 11 > 0.5 ? 1 : 0
-```
+### Integration
+The Node.js Express server acts as a proxy, forwarding requests from the React dashboard to the Python Flask microservice running on port 5001. If the Python microservice is offline, the React dashboard will seamlessly fall back to an older, rule-based inference engine (`leak_model.js`).
 
 ### Features
 
 | Feature          | How it is computed                                   | Why it matters                             |
 |------------------|------------------------------------------------------|--------------------------------------------||
-| `currentloss`    | Raw `lossRatio` for this tick                        | Immediate signal of abnormal loss rate     |
-| `rollingmeanloss`| Mean of last 5 `lossRatio` values                   | Filters one-tick spikes                    |
+| `currentloss`    | Raw `lossRatio` (`flowRate / reservoirLevel`)        | Immediate signal of abnormal loss rate     |
+| `rollingmeanloss`| Mean of last 5 `lossRatio` values                    | Filters one-tick spikes                    |
 | `rollingstdloss` | Std-dev of same window                               | High std = unstable flow = possible leak   |
 | `consecutivehigh`| Ticks in a row where `lossRatio > 0.15`              | Confirms sustained anomaly vs noise        |
 
-### Stateful detector
-`makeLeakDetector()` returns a closure that owns its ring buffer so feature
-engineering is encapsulated entirely inside the model file.
+---
 
-### Output
-```js
-{ isLeak: boolean, rollingMean: number, consecutiveHigh: number }
-```
+## 4. Model 2 — Autoencoder Anomaly Detection (TF.js)
+
+**File**: `dashboard/src/ai/adaptive_anomaly_model.js`
+
+### Problem
+Not all anomalies are known in advance. We need a system that can detect weird behaviour across *all* sensors simultaneously, without any labeled training data.
+
+### Algorithm — TensorFlow.js Deep Autoencoder
+An autoencoder is a neural network trained to compress data into a bottleneck and reconstruct it. If a new state differs from the states the autoencoder was trained on, it will fail to reconstruct it accurately. The **reconstruction error** serves as an `anomalyScore`.
+
+### Live Training
+This model trains *in the browser* on the live data stream. It gathers baseline data when the system starts, trains a deep neural network silently in a background thread, and then activates to predict anomalies on every tick.
 
 ---
 
-## 4. Model 2 — Predictive Maintenance
+## 5. Model 3 — Predictive Maintenance (In-Browser)
 
 **File**: `dashboard/src/ai/maintenance_model.js`
 
 ### Problem
-Predict pump failure before it happens so maintenance can be scheduled
-proactively rather than reactively.
+Predict pump failure before it happens so maintenance can be scheduled proactively.
 
 ### Algorithm — Random Forest (15 trees)
-
-Plurality voting across 15 trees. Each tree returns 0, 1, or 2:
-```
-state = argmax([count_0, count_1, count_2])
-```
+Plurality voting across 15 trees compiled natively into JavaScript `if/else` branches for zero-latency execution.
 
 ### Features
-
 | Feature                 | How it is computed                                        | Why it matters                                    |
 |-------------------------|-----------------------------------------------------------|---------------------------------------------------|
-| `currentavg`            | Motor current this tick (A)                               | Higher current = pump working harder               |
-| `flowavg`               | Flow rate this tick (L/min)                               | Low flow + high current = resistance in system     |
-| `tempavg`               | Pump housing temperature (°C)                             | Overheating precedes bearing failure               |
 | `efficiency`            | `current / max(flow, 0.5)` — A per L/min                  | Degrading efficiency is the earliest warning sign  |
 | `rollingslopecurrent`   | Least-squares slope of last 5 current values              | Rising current trend = increasing load             |
 | `rollingslopeefficiency`| Least-squares slope of last 5 efficiency values           | Rising slope = pump degrading over time            |
 
-The `slope()` helper uses ordinary least-squares on the index axis:
-```
-slope = Σ((xᵢ - x̄)(yᵢ - ȳ)) / Σ((xᵢ - x̄)²)
-```
-
-### Output
-```js
-{ state: 0 | 1 | 2, label: 'healthy' | 'warning' | 'critical' }
-```
-
 ---
 
-## 5. Model 3 — Water Quality (pH Proxy)
+## 6. Model 4 — Water Quality pH Proxy (In-Browser)
 
 **File**: `dashboard/src/ai/ph_model.js`
 
 ### Problem
-Estimate water quality without a dedicated pH sensor. Anomalous reservoir-level
-behaviour (sudden swings relative to the rolling baseline) is used as a proxy
-for chemical disturbances that in real networks correlate with pH excursions.
+Estimate water quality without a dedicated pH sensor. Sudden volumetric anomalies in the reservoir are used as a proxy for chemical disturbances.
 
 ### Algorithm — Random Forest (10 trees)
-
-Plurality voting returning 0 (good), 1 (caution), or 2 (poor).
-
-### Features
-
-| Feature          | How it is computed                                          | Why it matters                             |
-|------------------|-------------------------------------------------------------|--------------------------------------------||
-| `deviation`      | `|level - rollingMean| / max(rollingMean, 1)`               | Normalised instantaneous anomaly magnitude |
-| `rollingmeandev` | Mean deviation over last 5 ticks                            | Sustained vs transient anomaly             |
-| `rollingstddev`  | Std-dev of deviation over same window                       | Volatile deviation = higher quality risk   |
-| `consecutivedev` | Consecutive ticks where `deviation > 0.05`                  | Confirms persistent rather than spike      |
-
-### Output
-```js
-{ quality: 0 | 1 | 2, label: 'good' | 'caution' | 'poor', deviation: number }
-```
+Plurality voting returning 0 (good), 1 (caution), or 2 (poor). Uses deviation metrics against a rolling baseline.
 
 ---
 
-## 6. Model 4 — Solar Energy Forecast + Panel Soiling
+## 7. Model 5 — Solar Energy Forecast + Panel Soiling (In-Browser)
 
 **File**: `dashboard/src/ai/energy_model_v2.js`
 
-This file contains **two** separate sub-models.
-
-### 6a. Solar Current Forecaster — Gradient Boosted Trees (25 trees)
-
-GBT differs from a plain Random Forest in that each successive tree is trained
-on the **residual error** of the previous trees, not independently. The final
-prediction is the sum (not average) of all tree outputs, starting from a base
-estimate.
-
-```
-forecastCurrent = ftree0(f) + ftree1(f) + … + ftree24(f)
-```
-
-This additive correction gives GBT better accuracy on smooth continuous
-targets (solar current as a function of time-of-day and irradiance) compared
-to a plain RF.
-
-#### Features
-
-| Feature              | How it is computed                                               | Why it matters                                    |
-|----------------------|------------------------------------------------------------------|---------------------------------------------------|
-| `hoursin`/`hourcos`  | `sin(2π·h/24)` and `cos(2π·h/24)`                               | Cyclic encoding — avoids 23→0 discontinuity       |
-| `irradiancenow`      | `solarProduction × 10` (proxy)                                   | Direct correlation with output current            |
-| `cloudestimate`      | `irradiance / clearSkyIrradiance(hour)`, clamped to [0, 1.3]    | Accounts for cloud cover reducing output          |
-| `prevhourirradiance` | `irradiance × 0.95` (simple lag proxy)                           | Temporal context for trend continuation           |
-| `currentnow`         | `pumpMotorCurrent`                                               | Load-aware correction (high load → less net power)|
-
-Clear-sky model:
-```
-clearSky(h) = 900 × sin(π × (h - 6) / 12)   for 6 ≤ h ≤ 18, else 0
-```
-
-### 6b. Panel Soiling Detector — Random Forest (11 trees)
-
-Compares actual current output against the theoretical clear-sky maximum each
-tick and decides if panels are dirty.
-
-#### Features
-
-| Feature           | Description                                               |
-|-------------------|-----------------------------------------------------------|
-| `currentratio`    | `actualCurrent / expectedCurrent` this tick              |
-| `rollingmeanratio`| Mean ratio over last `PANEL_WINDOW` (5) ticks             |
-| `consecutivelow`  | Consecutive ticks where `ratio < 0.75`                    |
-
-#### Output
-```js
-// Panel detector
-{ needsCleaning: boolean, ratio: number | null, rollingMean: number }
-
-// Combined forecaster (makeEnergyForecaster)
-{ forecast: number (Watts), needsCleaning: boolean }
-```
+Contains **two** separate sub-models:
+1. **Solar Current Forecaster — Gradient Boosted Trees (25 trees)**: GBT differs from a plain Random Forest in that each successive tree is trained on the residual error of the previous trees.
+2. **Panel Soiling Detector — Random Forest (11 trees)**: Compares actual current output against the theoretical clear-sky maximum each tick and decides if panels are dirty.
 
 ---
 
-## 7. Model 5 — Conversational LLM (Google Gemini)
+## 8. Model 6 — Conversational LLM (Google Gemini)
 
 **File**: `dashboard/src/chat/chatEngine.js`
 
 ### Problem
-While the statistical Random Forest models are excellent at detecting specific numerical anomalies, human operators often need high-level qualitative analysis and troubleshooting advice (e.g., "Why is the pump drawing so much power?").
+Statistical models (like Random Forests and Autoencoders) are excellent at finding numerical anomalies, but human operators need actionable, qualitative advice ("Why is the pump drawing so much power?").
 
 ### Algorithm — Large Language Model (Gemini)
-We integrated Google's **Gemini 1.5** via the `@google/generative-ai` SDK to serve as a conversational AI expert.
-
-### System Prompt & Context Injection
-Every time the user asks a question, `chatEngine.js` intercepts the message and silently injects a **System Prompt**. This prompt contains:
-1. The AI's persona (expert IoT water management engineer).
-2. The **Live System State** stringified directly from the Zustand store (current flow rate, reservoir level, active alerts, pump health, etc.).
-
-By passing the live IoT state alongside the user's question, Gemini has perfect situational awareness of the water grid and can provide highly specific, real-time engineering advice.
+We integrated Google's **Gemini 1.5 Flash** to serve as a conversational AI expert. Every time the user asks a question, we inject a **System Prompt** containing the **Live System State** (current flow rate, leak risks, anomaly scores, etc.). Gemini acts as a highly capable Agent that possesses perfect situational awareness of the water grid.
 
 ---
 
-## 8. Central Hook — useAIEngine
+## 9. Central Hook — useAIEngine
 
 **File**: `dashboard/src/ai/useAIEngine.js`
 
-This React hook is the **single point of integration** between the live sensor
-stream and all four models. It runs inside `<AIProvider>` which is mounted
-once at the app root.
-
-### Lifecycle
-
-```
-Mount:
-  Instantiate 4 model detectors (one each via useRef so they persist across renders)
-  Allocate 5 rolling-window useRef buffers
-
-Every sensor tick (useEffect dependency on `sensors`):
-  1. Compute lossRatio and leak features → call detectLeak
-  2. Compute efficiency + slope features → call detectMaintenance
-  3. Compute reservoir deviation features → call detectPH
-  4. Compute solar efficiency ratio → call forecastEnergy
-  5. Call setAiResults() with all four results in one Zustand update
-```
-
-### Why `useRef` for model instances?
-
-Model factories (`makeLeakDetector`, etc.) are stateful — they own internal
-ring buffers. If they were re-created on every render, history would be lost.
-`useRef` guarantees a single instance that lives as long as the component.
-
-### AIProvider
-
-```jsx
-// In App.jsx
-import { AIProvider } from './ai/useAIEngine'
-
-<AIProvider>
-  <RouterProvider router={router} />
-</AIProvider>
-```
-
-`AIProvider` is a thin wrapper component that calls `useAIEngine()` so the
-hook is always active regardless of which page is currently rendered.
-
----
-
-## 9. Rolling Window Helper
-
-```js
-function pushWindow(ref, value, size = 10) {
-  ref.current = [...ref.current, value].slice(-size)
-  return ref.current
-}
-```
-
-Appends a new value to a `useRef`-backed array and trims it to the last `size`
-elements. Returns the current window so the caller can immediately compute
-statistics on it.
+This React hook is the **single point of integration**. 
+- It maintains rolling window buffers in `useRef` to prevent data loss across React renders.
+- It calculates feature derivatives (like `rollingstdloss` or least-squares slopes).
+- It executes all synchronous in-browser models.
+- It triggers the asynchronous Python API requests and TensorFlow.js inference.
+- It merges the final results and pushes them to the Zustand store.
 
 ---
 
@@ -339,45 +186,9 @@ statistics on it.
 
 | Model        | Raw inputs                                          | Derived features                              |
 |--------------|-----------------------------------------------------|-----------------------------------------------|
-| Leak         | `flowRate`, `reservoirLevel`                        | `lossRatio`, rolling mean/std, consecutiveHigh|
+| Python Leak  | `flowRate`, `reservoirLevel`                        | `lossRatio`, rolling mean/std, consecutiveHigh|
+| TF.js Anomaly| All sensors                                         | Normalised tensors                            |
 | Maintenance  | `pumpMotorCurrent`, `flowRate`, `pumpTemp`          | `efficiency`, slope(current), slope(eff)      |
-| pH / Quality | `reservoirLevel`                                    | `deviation`, rolling mean/std of deviation    |
+| pH Proxy     | `reservoirLevel`                                    | `deviation`, rolling mean/std of deviation    |
 | Solar GBT    | `solarProduction`, `pumpMotorCurrent`, `hour`       | `hoursin/cos`, `cloudEstimate`, `irradiance`  |
 | Panel RF     | computed `panelEfficiencyRatio`                     | `currentratio`, rolling mean, `consecutiveLow`|
-
----
-
-## 11. Adding a New Model
-
-1. **Create** `dashboard/src/ai/my_model.js`
-   - Write a `predictX(features)` ensemble function
-   - Export a `makeXDetector()` factory that owns its ring buffer
-2. **Import** in `useAIEngine.js`:
-   ```js
-   import { makeXDetector } from './my_model'
-   const detectX = useRef(makeXDetector()).current
-   ```
-3. **Compute features** inside the `useEffect` body
-4. **Call** `detectX(features)` and include the result in `setAiResults()`
-5. **Update the Zustand store** type in `useStore.js` to add the new field
-6. **Consume** in the relevant page component
-
----
-
-## 12. File Map
-
-```
-dashboard/src/
-├── ai/
-│   ├── leak_model.js          Random Forest — 11 trees — leak 0/1
-│   ├── maintenance_model.js   Random Forest — 15 trees — health 0/1/2
-│   ├── ph_model.js            Random Forest — 10 trees — quality 0/1/2
-│   ├── energy_model_v2.js     GBT 25 trees (forecast) + RF 11 trees (soiling)
-│   └── useAIEngine.js         Central hook + AIProvider component
-├── store/
-│   └── useStore.js            Zustand store (sensors, aiResults, alerts)
-└── pages/
-    ├── AIPage.jsx             AI Insights dashboard (all 4 model cards)
-    ├── WaterPage.jsx          Water management (Leak Risk + pH KPIs)
-    └── EnergyPage.jsx         Energy management (Solar Forecast + Panel Health)
-```

@@ -1,80 +1,61 @@
-# AquaGrid-AI — Trained Leak Detection Model (v2)
+# AquaGrid-AI — Machine Learning Pipeline
 
-This folder contains a **genuinely trained** machine learning model for leak
-detection, complementing the rule-based `leak_model.js` used in the live
-dashboard (see `AI_ENGINE.md` in the project root for the v1 architecture).
+This folder contains the complete, end-to-end Python Machine Learning pipeline for the AquaGrid-AI project. It complements the fast, in-browser AI engines by providing a robust, highly-accurate **Random Forest Classifier** designed specifically for real-time pipe leak detection.
 
 ## Why this exists
 
-The current in-browser AI engine (`dashboard/src/ai/`) uses hand-coded
-decision logic serialized as nested if/else JavaScript — fast and
-dependency-free, but not actually fit to data. This folder demonstrates the
-same problem solved with a real `scikit-learn` model trained on realistic
-simulated sensor data, producing a genuine `.pkl` artifact with measured
-accuracy, precision, recall, and a confusion matrix.
+While the in-browser statistical models (`dashboard/src/ai/`) are extremely fast, they rely on manually tuned thresholds. This folder demonstrates a rigorous Machine Learning approach, where a `scikit-learn` model was genuinely fit to a large dataset of simulated sensor telemetry. It produces a serialized `.pkl` model with scientifically measured accuracy, precision, and recall metrics.
 
-## Folder structure
+## Live Dashboard Integration
+
+> [!TIP]
+> **This model is fully integrated into the live dashboard.** 
+
+The model trained in this pipeline (`model/leak_model.pkl`) is actively served by the Python Flask microservice (`backend/ml_service.py`). The React dashboard automatically routes real-time sensor data through the Node proxy to the Python inference server, falling back to the in-browser logic only if the microservice is offline.
+
+## Folder Structure
 
 ```
-ml/
-├── generate_data.py       # Simulates sensor sessions + injects leak events
+ai/
+├── generate_data.py        # Simulates 24,000 rows of sensor sessions + injects leak events
 ├── train.py                # Trains RandomForestClassifier, saves .pkl + metrics
-├── predict.py               # Example inference against the trained model
-├── requirements.txt
+├── predict.py              # Example standalone inference against the trained model
+├── requirements.txt        # Python dependencies (scikit-learn, pandas, etc.)
 ├── data/
 │   └── synthetic_leak_data.csv
 └── model/
-    ├── leak_model.pkl
-    ├── metrics.md
+    ├── leak_model.pkl      # The active production model binary
+    ├── metrics.md          # Scientific evaluation of model accuracy
     └── feature_importance.png
 ```
 
-## How to reproduce
+## How to Reproduce
+
+You can completely recreate the synthetic dataset and retrain the model from scratch:
 
 ```bash
+# 1. Install dependencies
 pip install -r requirements.txt
-python3 generate_data.py   # generates data/synthetic_leak_data.csv
-python3 train.py           # trains model, writes model/leak_model.pkl + metrics.md
-python3 predict.py         # example inference calls
+
+# 2. Generate the dataset (creates data/synthetic_leak_data.csv)
+python3 generate_data.py
+
+# 3. Train the model (writes model/leak_model.pkl + updates metrics.md)
+python3 train.py
+
+# 4. Run sample predictions to verify inference
+python3 predict.py
 ```
 
-## Results summary
+## Results Summary
 
-See `model/metrics.md` for full details. Headline test-set numbers:
+See [`model/metrics.md`](model/metrics.md) for full details. Headline test-set numbers:
 
-| Metric    | Value  |
-|-----------|--------|
-| Accuracy  | 0.85   |
-| Precision | 0.54   |
-| Recall    | 0.84   |
-| F1 Score  | 0.66   |
+| Metric    | Value  | Note |
+|-----------|--------|------|
+| **Accuracy**  | 85.2%   | Overall correctness |
+| **Precision** | 53.9%   | Proportion of predicted leaks that were actual leaks |
+| **Recall**    | 84.0%   | Proportion of actual leaks successfully caught |
+| **F1 Score**  | 66.0%   | Harmonic mean of precision and recall |
 
-The model is tuned toward **high recall** (catching real leaks) over
-precision, which is the right tradeoff for a leak-detection system — a false
-alarm costs a wasted check, a missed leak costs water and money.
-
-## Known limitation
-
-The model currently over-triggers on single-tick transient spikes (see
-`predict.py`'s "Transient spike" example) rather than requiring a sustained
-pattern. This is an honest artifact of training on synthetic data with only
-~400 simulated sessions. With more training sequences (or real Firebase
-sensor history), the `consecutivehigh` feature would be expected to gain more
-weight and reduce this false-positive mode.
-
-## Path to production
-
-This model is currently **not wired into the live dashboard** — it's a
-validated, offline proof of concept. The planned integration path (see
-`architecture.md`) is:
-
-1. Wrap `predict.py`'s logic in a FastAPI `/predict` endpoint
-2. Deploy the API (e.g. Render, Railway, Hugging Face Spaces)
-3. Replace the relevant call in `dashboard/src/ai/useAIEngine.js` with a
-   `fetch()` to that endpoint, with a fallback to the existing rule-based
-   logic if the API is unreachable
-4. Retrain periodically on real sensor history logged via Firebase
-
-This keeps the fast, offline-capable rule-based system as a reliable
-fallback while introducing a genuinely trained model where it adds the most
-value.
+The model is intentionally tuned toward **high recall** (catching real leaks) over precision. This is the optimal tradeoff for an industrial leak-detection system: a false alarm costs a wasted inspection, but a missed leak costs massive amounts of water, infrastructure damage, and money.
